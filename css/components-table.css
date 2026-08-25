@@ -1,0 +1,223 @@
+/* ==========================================
+   COMPONENTS TABLE - Tabela e Paginação
+   ========================================== */
+
+/* Tabela - COMPACTA com scroll vertical */
+.table-container {
+    overflow-x: auto;
+    background-color: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    max-height: 600px;
+    overflow-y: auto;
+    position: relative;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1500px;
+    font-size: var(--font-size-xs);
+}
+
+.data-table thead {
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.data-table th {
+    padding: 8px 8px;
+    text-align: center;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    position: sticky;
+    top: 0;
+    background-color: var(--primary-color);
+    z-index: 10;
+    white-space: nowrap;
+    font-size: 11px;
+}
+
+.data-table th:hover {
+    background-color: #34495e;
+}
+
+.data-table th .sort-icon {
+    margin-left: 4px;
+    font-size: 10px;
+}
+
+.data-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+    font-size: 11px;
+    text-align: center;
+}
+
+.data-table tbody tr {
+    transition: var(--transition);
+}
+
+.data-table tbody tr:hover {
+    background-color: var(--bg-primary);
+}
+
+/* Status colors */
+.status-expedido {
+    background-color: rgba(39, 174, 96, 0.08);
+    border-left: 3px solid var(--success-color) !important;
+}
+
+.status-aberto {
+    background-color: rgba(243, 156, 18, 0.08);
+    border-left: 3px solid var(--warning-color) !important;
+}
+
+.status-corte {
+    background-color: rgba(231, 76, 60, 0.08);
+    border-left: 3px solid var(--danger-color) !important;
+}
+
+/* Badge de status */
+.status-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-badge.status-expedido {
+    background-color: var(--success-color);
+    color: var(--text-light);
+}
+
+.status-badge.status-aberto {
+    background-color: var(--warning-color);
+    color: var(--text-light);
+}
+
+.status-badge.status-corte {
+    background-color: var(--danger-color);
+    color: var(--text-light);
+}
+
+/* Paginação - MELHORADA */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.page-info {
+    display: flex;
+    gap: var(--spacing-xs);
+    align-items: center;
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+}
+
+.page-jump {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    margin-left: var(--spacing-md);
+}
+
+.page-jump label {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.page-jump input {
+    width: 60px;
+    padding: 6px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    text-align: center;
+    font-size: var(--font-size-sm);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.page-jump input:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.page-numbers {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.page-number {
+    min-width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+}
+
+.page-number:hover {
+    background-color: var(--bg-primary);
+    border-color: var(--secondary-color);
+}
+
+.page-number.active {
+    background-color: var(--secondary-color);
+    color: var(--text-light);
+    border-color: var(--secondary-color);
+    font-weight: 600;
+}
+
+/* Records per page selector */
+.records-per-page {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.records-per-page label {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.records-per-page select {
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: var(--font-size-sm);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.records-per-page select:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
