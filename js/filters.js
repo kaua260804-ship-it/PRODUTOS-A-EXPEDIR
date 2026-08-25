@@ -27,6 +27,7 @@ class Filters {
     initializeEventListeners() {
         document.getElementById('filterData').addEventListener('change', (e) => {
             this.filters.data = e.target.value;
+            console.log('Filtro de data alterado para:', e.target.value);
             this.applyFilters();
         });
         
@@ -82,27 +83,40 @@ class Filters {
      * Popula as opções dos filtros dropdown
      */
     populateFilterOptions() {
+        console.log('========================================');
+        console.log('POPULANDO FILTROS:');
+        console.log('========================================');
+        
         // Datas (formatadas)
         const datas = this.dataProcessor.getUniqueValues('DATA');
+        console.log(`Datas encontradas para filtro (${datas.length}):`);
+        datas.forEach((data, index) => {
+            console.log(`  ${index + 1}. Valor original: "${data}" | Formatada: ${this.formatDateDisplay(data)}`);
+        });
+        
         this.populateSelect('filterData', datas, true);
         
         // Empresas
         const empresas = this.dataProcessor.getUniqueValues('EMPRESA');
+        console.log(`Empresas encontradas (${empresas.length})`);
         this.populateSelect('filterEmpresa', empresas);
         
         // Categorias
         const categorias = this.dataProcessor.getUniqueValues('CATEGORIA');
+        console.log(`Categorias encontradas (${categorias.length})`);
         this.populateSelect('filterCategoria', categorias);
         
         // Grupos
         const grupos = this.dataProcessor.getUniqueValues('GRUPO');
+        console.log(`Grupos encontrados (${grupos.length})`);
         this.populateSelect('filterGrupo', grupos);
         
         // Subgrupos
         const subgrupos = this.dataProcessor.getUniqueValues('SUBGRUPO');
+        console.log(`Subgrupos encontrados (${subgrupos.length})`);
         this.populateSelect('filterSubgrupo', subgrupos);
         
-        console.log('Filtros populados - Datas:', datas.length, 'Empresas:', empresas.length);
+        console.log('========================================');
     }
 
     /**
@@ -131,6 +145,8 @@ class Filters {
         });
         
         select.value = currentValue;
+        
+        console.log(`Select "${selectId}" populado com ${values.length} opções`);
     }
 
     /**
@@ -206,6 +222,8 @@ class Filters {
      * Aplica os filtros aos dados
      */
     applyFilters() {
+        const dataAntes = this.filteredData.length;
+        
         this.filteredData = this.dataProcessor.processedData.filter(row => {
             // Filtro por data
             if (this.filters.data && row['DATA']?.toString() !== this.filters.data) {
@@ -255,7 +273,7 @@ class Filters {
             return true;
         });
         
-        console.log('Filtros aplicados:', this.filteredData.length, 'registros');
+        console.log(`Filtros aplicados: ${dataAntes} -> ${this.filteredData.length} registros`);
         
         // Disparar evento para atualizar tabela e cards
         document.dispatchEvent(new CustomEvent('dataFiltered', {
@@ -294,6 +312,8 @@ class Filters {
         document.getElementById('autocompletePedido').innerHTML = '';
         document.getElementById('autocompleteCodigo').innerHTML = '';
         document.getElementById('autocompleteProduto').innerHTML = '';
+        
+        console.log('Todos os filtros foram limpos');
         
         this.applyFilters();
     }
