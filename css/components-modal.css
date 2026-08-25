@@ -30,35 +30,39 @@
     background-color: var(--bg-secondary);
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow-lg);
-    width: 90%;
-    max-width: 800px;
-    max-height: 90vh;
+    width: 95%;
+    max-width: 700px;
+    max-height: 85vh;
     overflow-y: auto;
     animation: slideIn 0.3s ease;
     z-index: 1;
     margin: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-lg);
+    padding: var(--spacing-md) var(--spacing-lg);
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
     background-color: var(--bg-secondary);
     z-index: 2;
     border-radius: var(--border-radius) var(--border-radius) 0 0;
+    flex-shrink: 0;
 }
 
 .modal-title {
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-md);
     font-weight: 700;
     color: var(--text-primary);
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
+    margin: 0;
 }
 
 .modal-title i {
@@ -81,20 +85,22 @@
 }
 
 .modal-body {
-    padding: var(--spacing-lg);
+    padding: var(--spacing-md);
+    flex: 1;
+    overflow-y: auto;
 }
 
-/* Tipo de comparativo */
+/* Tipo de comparativo - COMPACTO */
 .comparativo-tipo {
     display: flex;
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-lg);
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
     justify-content: center;
     flex-wrap: wrap;
 }
 
 .comparativo-tipo-btn {
-    padding: 10px 20px;
+    padding: 8px 16px;
     border: 2px solid var(--border-color);
     background-color: var(--bg-secondary);
     color: var(--text-primary);
@@ -106,10 +112,13 @@
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
+    flex: 1;
+    justify-content: center;
+    min-width: 150px;
 }
 
 .comparativo-tipo-btn i {
-    font-size: var(--font-size-md);
+    font-size: var(--font-size-sm);
 }
 
 .comparativo-tipo-btn:hover {
@@ -128,13 +137,13 @@
     color: var(--text-light);
 }
 
-/* Selectores do comparativo */
+/* Selectores do comparativo - COMPACTO */
 .comparativo-selectors {
     display: grid;
-    grid-template-columns: 1fr 1fr auto;
-    gap: var(--spacing-md);
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-sm);
     align-items: end;
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: var(--spacing-sm);
 }
 
 .comparativo-selector {
@@ -145,14 +154,14 @@
 
 .comparativo-selector label {
     font-weight: 600;
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     color: var(--text-primary);
     text-align: center;
 }
 
 .comparativo-selector select {
     width: 100%;
-    padding: 10px;
+    padding: 8px;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     font-size: var(--font-size-sm);
@@ -169,10 +178,43 @@
     box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
-/* Filtros do comparativo */
+/* Botão gerar comparativo */
+#btnGerarComparativo {
+    grid-column: 1 / -1;
+    padding: 10px 20px;
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+    color: var(--text-light);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--box-shadow);
+    white-space: nowrap;
+    width: 100%;
+}
+
+#btnGerarComparativo:hover {
+    box-shadow: var(--box-shadow-lg);
+    transform: translateY(-2px);
+}
+
+#btnGerarComparativo:active {
+    transform: translateY(0);
+    box-shadow: var(--box-shadow);
+}
+
+#btnGerarComparativo i {
+    font-size: var(--font-size-sm);
+}
+
+/* Filtros do comparativo - COMPACTO */
 .comparativo-filtros {
-    margin-bottom: var(--spacing-lg);
-    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-sm);
     background-color: var(--bg-primary);
     border-radius: var(--border-radius);
 }
@@ -180,8 +222,8 @@
 .comparativo-filtros .filters-grid {
     margin-bottom: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--spacing-md);
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-sm);
 }
 
 .comparativo-filtros .filter-group {
@@ -193,7 +235,7 @@
     font-weight: 600;
     margin-bottom: var(--spacing-xs);
     color: var(--text-primary);
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     text-align: center;
 }
 
@@ -204,10 +246,10 @@
 
 .comparativo-filtros .filter-select {
     width: 100%;
-    padding: 8px;
+    padding: 6px;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     background-color: var(--bg-secondary);
     color: var(--text-primary);
     text-align: center;
@@ -223,7 +265,7 @@
 
 /* Filtros aplicados no comparativo */
 .filtros-aplicados {
-    margin-top: var(--spacing-sm);
+    margin-top: var(--spacing-xs);
     font-size: var(--font-size-xs);
     color: var(--text-secondary);
     font-weight: 500;
@@ -236,24 +278,25 @@
 /* Resultado do comparativo */
 .comparativo-resultado {
     animation: fadeIn 0.5s ease;
+    margin-top: var(--spacing-md);
 }
 
 .comparativo-header {
     text-align: center;
-    margin-bottom: var(--spacing-lg);
-    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-sm);
     background-color: var(--bg-primary);
     border-radius: var(--border-radius);
 }
 
 .comparativo-header h3 {
     color: var(--text-primary);
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-sm);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: var(--spacing-sm);
-    margin: 0 0 var(--spacing-sm) 0;
+    margin: 0;
     flex-wrap: wrap;
 }
 
@@ -262,8 +305,8 @@
 }
 
 .comparativo-item {
-    padding: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
     border-radius: var(--border-radius);
     border-left: 4px solid var(--border-color);
     transition: var(--transition);
@@ -295,22 +338,22 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
     flex-wrap: wrap;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
 }
 
 .comparativo-item-title {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
     font-weight: 600;
-    font-size: var(--font-size-md);
+    font-size: var(--font-size-sm);
     color: var(--text-primary);
 }
 
 .comparativo-item-title i {
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-sm);
 }
 
 .comparativo-item-title i.fa-times-circle {
@@ -328,29 +371,29 @@
 .comparativo-item-values {
     display: flex;
     align-items: baseline;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
 }
 
 .valor-principal {
-    font-size: var(--font-size-xl);
+    font-size: var(--font-size-lg);
     font-weight: 700;
     color: var(--text-primary);
 }
 
 .valor-percentual {
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     color: var(--text-secondary);
 }
 
 .comparativo-item-detail {
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     color: var(--text-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: var(--spacing-xs);
     flex-wrap: wrap;
-    line-height: 1.5;
+    line-height: 1.4;
 }
 
 .comparativo-item-detail strong.bom {
@@ -366,15 +409,15 @@
 }
 
 .indicador {
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-md);
     margin-left: var(--spacing-xs);
     animation: pulse 1s ease;
 }
 
-/* Footer do comparativo */
+/* Footer do comparativo - COMPACTO */
 .comparativo-footer {
-    margin-top: var(--spacing-lg);
-    padding: var(--spacing-md);
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-sm);
     background-color: var(--bg-primary);
     border-radius: var(--border-radius);
     text-align: center;
@@ -383,12 +426,12 @@
 .total-info {
     display: flex;
     justify-content: center;
-    gap: var(--spacing-lg);
+    gap: var(--spacing-md);
     flex-wrap: wrap;
 }
 
 .total-info span {
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     color: var(--text-secondary);
 }
 
@@ -465,22 +508,22 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .modal-content {
-        width: 95%;
-        max-height: 95vh;
-        margin: 10px auto;
+        width: 100%;
+        max-height: 90vh;
+        margin: 5px;
     }
     
     .modal-header {
-        padding: var(--spacing-md);
+        padding: var(--spacing-sm);
     }
     
     .modal-body {
-        padding: var(--spacing-md);
+        padding: var(--spacing-sm);
     }
     
     .comparativo-selectors {
         grid-template-columns: 1fr;
-        gap: var(--spacing-sm);
+        gap: var(--spacing-xs);
     }
     
     .comparativo-tipo {
@@ -490,6 +533,12 @@
     .comparativo-tipo-btn {
         width: 100%;
         justify-content: center;
+        min-width: auto;
+    }
+    
+    .comparativo-filtros .filters-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xs);
     }
     
     .comparativo-item-header {
@@ -504,13 +553,8 @@
         gap: var(--spacing-xs);
     }
     
-    .comparativo-filtros .filters-grid {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-sm);
-    }
-    
     .comparativo-header h3 {
-        font-size: var(--font-size-md);
+        font-size: var(--font-size-xs);
         flex-direction: column;
         gap: var(--spacing-xs);
     }
@@ -530,40 +574,40 @@
     }
     
     .modal-header {
-        padding: var(--spacing-sm);
+        padding: var(--spacing-xs);
     }
     
     .modal-title {
-        font-size: var(--font-size-md);
+        font-size: var(--font-size-sm);
     }
     
     .modal-body {
-        padding: var(--spacing-sm);
+        padding: var(--spacing-xs);
     }
     
     .comparativo-tipo-btn {
-        padding: 8px 12px;
+        padding: 6px 10px;
         font-size: var(--font-size-xs);
     }
     
     .comparativo-item {
-        padding: var(--spacing-sm);
+        padding: var(--spacing-xs);
     }
     
     .comparativo-item-title {
-        font-size: var(--font-size-sm);
-    }
-    
-    .valor-principal {
-        font-size: var(--font-size-lg);
-    }
-    
-    .comparativo-item-detail {
         font-size: var(--font-size-xs);
     }
     
-    .indicador {
+    .valor-principal {
         font-size: var(--font-size-md);
+    }
+    
+    .comparativo-item-detail {
+        font-size: 10px;
+    }
+    
+    .indicador {
+        font-size: var(--font-size-sm);
     }
     
     .filtros-aplicados {
@@ -588,35 +632,4 @@
 
 .modal-content::-webkit-scrollbar-thumb:hover {
     background: var(--text-secondary);
-}
-
-/* Estilos para os botões de gerar comparativo */
-#btnGerarComparativo {
-    padding: 12px 24px;
-    font-size: var(--font-size-md);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    background: linear-gradient(135deg, var(--secondary-color), #2980b9);
-    color: var(--text-light);
-    border: none;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: var(--transition);
-    box-shadow: var(--box-shadow);
-    white-space: nowrap;
-}
-
-#btnGerarComparativo:hover {
-    box-shadow: var(--box-shadow-lg);
-    transform: translateY(-2px);
-}
-
-#btnGerarComparativo:active {
-    transform: translateY(0);
-    box-shadow: var(--box-shadow);
-}
-
-#btnGerarComparativo i {
-    font-size: var(--font-size-lg);
 }
