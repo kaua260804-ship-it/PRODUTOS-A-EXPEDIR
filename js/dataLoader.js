@@ -10,14 +10,26 @@ class DataLoader {
     }
 
     /**
-     * Carrega o arquivo Excel
+     * Carrega o arquivo Excel com cache busting
      */
     async loadExcelFile() {
         try {
             this.isLoading = true;
             this.showProgress(true);
             
-            const response = await fetch(CONFIG.EXCEL_FILE_PATH);
+            // Adicionar timestamp para evitar cache
+            const timestamp = new Date().getTime();
+            const filePath = `${CONFIG.EXCEL_FILE_PATH}?t=${timestamp}`;
+            
+            console.log('Carregando arquivo:', filePath);
+            
+            const response = await fetch(filePath, {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                }
+            });
             
             if (!response.ok) {
                 throw new Error(`Arquivo não encontrado: ${CONFIG.EXCEL_FILE_PATH}`);
@@ -115,7 +127,6 @@ class DataLoader {
      */
     showError(message) {
         console.error(message);
-        // Poderia exibir um modal ou toast aqui
         alert('Erro: ' + message);
     }
 
