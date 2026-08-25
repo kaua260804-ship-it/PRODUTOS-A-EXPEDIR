@@ -5,7 +5,7 @@
 class Comparativo {
     constructor(dataProcessor) {
         this.dataProcessor = dataProcessor;
-        this.tipoComparativo = 'dia'; // 'dia' ou 'mes'
+        this.tipoComparativo = 'dia';
         this.filtrosComparativo = {
             categoria: '',
             grupo: '',
@@ -34,7 +34,6 @@ class Comparativo {
             this.gerarComparativo();
         });
         
-        // Event listeners para os botões de tipo
         document.getElementById('btnTipoDia').addEventListener('click', () => {
             this.tipoComparativo = 'dia';
             document.getElementById('btnTipoDia').classList.add('active');
@@ -51,7 +50,6 @@ class Comparativo {
             this.atualizarSelectores();
         });
         
-        // Event listeners para os filtros do comparativo
         document.getElementById('comparativoCategoria').addEventListener('change', (e) => {
             this.filtrosComparativo.categoria = e.target.value;
             this.atualizarFiltrosDependentes();
@@ -74,20 +72,15 @@ class Comparativo {
         const modal = document.getElementById('comparativoModal');
         modal.style.display = 'flex';
         
-        // Resetar filtros
         this.filtrosComparativo = {
             categoria: '',
             grupo: '',
             subgrupo: ''
         };
         
-        // Popular os filtros
         this.popularFiltrosComparativo();
-        
-        // Popular as datas disponíveis
         this.atualizarSelectores();
         
-        // Limpar resultado anterior
         document.getElementById('comparativoResultado').style.display = 'none';
         document.getElementById('comparativoResultado').innerHTML = '';
     }
@@ -131,33 +124,23 @@ class Comparativo {
      * Popula os filtros de categoria, grupo e subgrupo
      */
     popularFiltrosComparativo() {
-        // Categorias
         const categorias = this.dataProcessor.getUniqueValues('CATEGORIA');
         this.popularSelect('comparativoCategoria', categorias, 'Todas');
         
-        // Grupos
         const grupos = this.dataProcessor.getUniqueValues('GRUPO');
         this.popularSelect('comparativoGrupo', grupos, 'Todos');
         
-        // Subgrupos
         const subgrupos = this.dataProcessor.getUniqueValues('SUBGRUPO');
         this.popularSelect('comparativoSubgrupo', subgrupos, 'Todos');
-        
-        console.log('Filtros do comparativo populados:', {
-            categorias: categorias.length,
-            grupos: grupos.length,
-            subgrupos: subgrupos.length
-        });
     }
 
     /**
-     * Atualiza filtros dependentes (grupo e subgrupo baseado na categoria)
+     * Atualiza filtros dependentes
      */
     atualizarFiltrosDependentes() {
         const categoriaSelecionada = this.filtrosComparativo.categoria;
         const grupoSelecionado = this.filtrosComparativo.grupo;
         
-        // Filtrar dados pela categoria selecionada
         let dadosFiltrados = this.dataProcessor.processedData;
         
         if (categoriaSelecionada) {
@@ -166,7 +149,6 @@ class Comparativo {
             );
         }
         
-        // Atualizar grupos baseado na categoria
         const grupos = new Set();
         dadosFiltrados.forEach(row => {
             if (row['GRUPO']) {
@@ -185,14 +167,12 @@ class Comparativo {
         });
         grupoSelect.value = grupoAtual || '';
         
-        // Filtrar por grupo se selecionado
         if (grupoSelecionado && grupoSelect.value === grupoSelecionado) {
             dadosFiltrados = dadosFiltrados.filter(row => 
                 row['GRUPO']?.toString() === grupoSelecionado
             );
         }
         
-        // Atualizar subgrupos baseado na categoria e grupo
         const subgrupos = new Set();
         dadosFiltrados.forEach(row => {
             if (row['SUBGRUPO']) {
@@ -238,7 +218,6 @@ class Comparativo {
         dataBase.innerHTML = '<option value="">Selecione a data base</option>';
         dataComparacao.innerHTML = '<option value="">Selecione a data de comparação</option>';
         
-        // Ordenar datas (mais recente primeiro)
         const datasOrdenadas = datas.sort((a, b) => {
             const dateA = this.parseDate(a);
             const dateB = this.parseDate(b);
@@ -349,19 +328,16 @@ class Comparativo {
      */
     aplicarFiltrosComparativo(dados) {
         return dados.filter(row => {
-            // Filtro por categoria
             if (this.filtrosComparativo.categoria && 
                 row['CATEGORIA']?.toString() !== this.filtrosComparativo.categoria) {
                 return false;
             }
             
-            // Filtro por grupo
             if (this.filtrosComparativo.grupo && 
                 row['GRUPO']?.toString() !== this.filtrosComparativo.grupo) {
                 return false;
             }
             
-            // Filtro por subgrupo
             if (this.filtrosComparativo.subgrupo && 
                 row['SUBGRUPO']?.toString() !== this.filtrosComparativo.subgrupo) {
                 return false;
@@ -394,7 +370,6 @@ class Comparativo {
                 row['DATA']?.toString() === dataComparacao.toString()
             );
         } else {
-            // Filtrar por mês
             dadosBase = this.dataProcessor.processedData.filter(row => {
                 const data = this.parseDate(row['DATA']);
                 return data && `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}` === dataBase;
@@ -406,17 +381,16 @@ class Comparativo {
             });
         }
         
-        // Aplicar filtros de categoria, grupo e subgrupo
         dadosBase = this.aplicarFiltrosComparativo(dadosBase);
         dadosComparacao = this.aplicarFiltrosComparativo(dadosComparacao);
         
         if (dadosBase.length === 0) {
-            alert(`Não há dados para o ${this.tipoComparativo === 'dia' ? 'dia' : 'mês'} base selecionado com os filtros aplicados`);
+            alert(`Não há dados para o ${this.tipoComparativo === 'dia' ? 'dia' : 'mês'} base selecionado`);
             return;
         }
         
         if (dadosComparacao.length === 0) {
-            alert(`Não há dados para o ${this.tipoComparativo === 'dia' ? 'dia' : 'mês'} de comparação selecionado com os filtros aplicados`);
+            alert(`Não há dados para o ${this.tipoComparativo === 'dia' ? 'dia' : 'mês'} de comparação selecionado`);
             return;
         }
         
@@ -427,10 +401,10 @@ class Comparativo {
     }
 
     /**
-     * Calcula estatísticas
+     * Calcula estatísticas - CONTAGEM NORMAL
      */
     calcularEstatisticas(dados) {
-        const totalItens = dados.length;
+        const totalItens = dados.length; // Contagem normal
         const itensCortados = dados.filter(row => row['STATUS'] === 'CORTE').length;
         const itensAbertos = dados.filter(row => row['STATUS'] === 'ABERTO').length;
         const itensAtendidos = dados.filter(row => row['STATUS'] === 'EXPEDIDO').length;
@@ -469,7 +443,6 @@ class Comparativo {
         const indicadorAbertos = this.determinarIndicador(diffAbertos, false);
         const indicadorAtendidos = this.determinarIndicador(diffAtendidos, true);
         
-        // Construir texto dos filtros aplicados
         const filtrosAplicados = [];
         if (this.filtrosComparativo.categoria) filtrosAplicados.push(`Categoria: ${this.filtrosComparativo.categoria}`);
         if (this.filtrosComparativo.grupo) filtrosAplicados.push(`Grupo: ${this.filtrosComparativo.grupo}`);
@@ -555,13 +528,6 @@ class Comparativo {
             </div>
         `;
         
-        // Centralizar o modal
-        const modalContent = document.querySelector('.modal-content');
-        if (modalContent) {
-            modalContent.style.margin = 'auto';
-        }
-        
-        // Scroll para o resultado
         container.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
