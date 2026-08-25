@@ -121,7 +121,7 @@ class Comparativo {
     }
 
     /**
-     * Popula os filtros de categoria, grupo e subgrupo
+     * Popula os filtros
      */
     popularFiltrosComparativo() {
         const categorias = this.dataProcessor.getUniqueValues('CATEGORIA');
@@ -139,7 +139,6 @@ class Comparativo {
      */
     atualizarFiltrosDependentes() {
         const categoriaSelecionada = this.filtrosComparativo.categoria;
-        const grupoSelecionado = this.filtrosComparativo.grupo;
         
         let dadosFiltrados = this.dataProcessor.processedData;
         
@@ -151,13 +150,10 @@ class Comparativo {
         
         const grupos = new Set();
         dadosFiltrados.forEach(row => {
-            if (row['GRUPO']) {
-                grupos.add(row['GRUPO'].toString());
-            }
+            if (row['GRUPO']) grupos.add(row['GRUPO'].toString());
         });
         
         const grupoSelect = document.getElementById('comparativoGrupo');
-        const grupoAtual = grupoSelect.value;
         grupoSelect.innerHTML = '<option value="">Todos</option>';
         Array.from(grupos).sort().forEach(grupo => {
             const option = document.createElement('option');
@@ -165,23 +161,15 @@ class Comparativo {
             option.textContent = grupo;
             grupoSelect.appendChild(option);
         });
-        grupoSelect.value = grupoAtual || '';
         
-        if (grupoSelecionado && grupoSelect.value === grupoSelecionado) {
-            dadosFiltrados = dadosFiltrados.filter(row => 
-                row['GRUPO']?.toString() === grupoSelecionado
-            );
-        }
+        this.filtrosComparativo.grupo = '';
         
         const subgrupos = new Set();
         dadosFiltrados.forEach(row => {
-            if (row['SUBGRUPO']) {
-                subgrupos.add(row['SUBGRUPO'].toString());
-            }
+            if (row['SUBGRUPO']) subgrupos.add(row['SUBGRUPO'].toString());
         });
         
         const subgrupoSelect = document.getElementById('comparativoSubgrupo');
-        const subgrupoAtual = subgrupoSelect.value;
         subgrupoSelect.innerHTML = '<option value="">Todos</option>';
         Array.from(subgrupos).sort().forEach(subgrupo => {
             const option = document.createElement('option');
@@ -189,11 +177,12 @@ class Comparativo {
             option.textContent = subgrupo;
             subgrupoSelect.appendChild(option);
         });
-        subgrupoSelect.value = subgrupoAtual || '';
+        
+        this.filtrosComparativo.subgrupo = '';
     }
 
     /**
-     * Popula um select com opções
+     * Popula um select
      */
     popularSelect(selectId, values, placeholder) {
         const select = document.getElementById(selectId);
@@ -278,7 +267,7 @@ class Comparativo {
     }
 
     /**
-     * Formata mês para exibição
+     * Formata mês
      */
     formatMesDisplay(mes) {
         const [ano, mesNum] = mes.split('-');
@@ -290,7 +279,7 @@ class Comparativo {
     }
 
     /**
-     * Converte data para objeto Date
+     * Converte data
      */
     parseDate(dataStr) {
         if (typeof dataStr === 'number' || !isNaN(dataStr)) {
@@ -313,7 +302,7 @@ class Comparativo {
     }
 
     /**
-     * Formata data para exibição
+     * Formata data
      */
     formatDateDisplay(dataStr) {
         const date = this.parseDate(dataStr);
@@ -324,7 +313,7 @@ class Comparativo {
     }
 
     /**
-     * Aplica os filtros do comparativo aos dados
+     * Aplica filtros
      */
     aplicarFiltrosComparativo(dados) {
         return dados.filter(row => {
@@ -385,12 +374,12 @@ class Comparativo {
         dadosComparacao = this.aplicarFiltrosComparativo(dadosComparacao);
         
         if (dadosBase.length === 0) {
-            alert(`Não há dados para o ${this.tipoComparativo === 'dia' ? 'dia' : 'mês'} base selecionado`);
+            alert(`Não há dados para o período base selecionado`);
             return;
         }
         
         if (dadosComparacao.length === 0) {
-            alert(`Não há dados para o ${this.tipoComparativo === 'dia' ? 'dia' : 'mês'} de comparação selecionado`);
+            alert(`Não há dados para o período de comparação selecionado`);
             return;
         }
         
@@ -401,10 +390,10 @@ class Comparativo {
     }
 
     /**
-     * Calcula estatísticas - CONTAGEM NORMAL
+     * Calcula estatísticas
      */
     calcularEstatisticas(dados) {
-        const totalItens = dados.length; // Contagem normal
+        const totalItens = dados.length;
         const itensCortados = dados.filter(row => row['STATUS'] === 'CORTE').length;
         const itensAbertos = dados.filter(row => row['STATUS'] === 'ABERTO').length;
         const itensAtendidos = dados.filter(row => row['STATUS'] === 'EXPEDIDO').length;
@@ -421,7 +410,7 @@ class Comparativo {
     }
 
     /**
-     * Exibe o resultado
+     * Exibe o resultado com layout inline compacto
      */
     exibirResultado(statsBase, statsComparacao, dataBase, dataComparacao) {
         const container = document.getElementById('comparativoResultado');
@@ -439,96 +428,71 @@ class Comparativo {
         const diffAbertos = statsBase.percentualAbertos - statsComparacao.percentualAbertos;
         const diffAtendidos = statsBase.percentualAtendidos - statsComparacao.percentualAtendidos;
         
-        const indicadorCortados = this.determinarIndicador(diffCortados, false);
-        const indicadorAbertos = this.determinarIndicador(diffAbertos, false);
-        const indicadorAtendidos = this.determinarIndicador(diffAtendidos, true);
-        
-        const filtrosAplicados = [];
-        if (this.filtrosComparativo.categoria) filtrosAplicados.push(`Categoria: ${this.filtrosComparativo.categoria}`);
-        if (this.filtrosComparativo.grupo) filtrosAplicados.push(`Grupo: ${this.filtrosComparativo.grupo}`);
-        if (this.filtrosComparativo.subgrupo) filtrosAplicados.push(`Subgrupo: ${this.filtrosComparativo.subgrupo}`);
-        
-        const filtrosTexto = filtrosAplicados.length > 0 
-            ? `<div class="filtros-aplicados">Filtros: ${filtrosAplicados.join(' | ')}</div>`
-            : '';
+        const indCortados = this.determinarIndicador(diffCortados, false);
+        const indAbertos = this.determinarIndicador(diffAbertos, false);
+        const indAtendidos = this.determinarIndicador(diffAtendidos, true);
         
         container.innerHTML = `
             <div class="comparativo-header">
                 <h3>
                     <i class="fas fa-calendar-check"></i>
-                    Comparativo: ${periodoBase} vs ${periodoComparacao}
+                    ${periodoBase} vs ${periodoComparacao}
                 </h3>
-                ${filtrosTexto}
             </div>
             
-            <div class="comparativo-item ${indicadorCortados.tipo}">
+            <div class="comparativo-item ${indCortados.tipo}">
                 <div class="comparativo-item-header">
-                    <div class="comparativo-item-title">
+                    <span class="comparativo-item-title">
                         <i class="fas fa-times-circle"></i>
-                        <span>ITENS CORTADOS:</span>
-                    </div>
-                    <div class="comparativo-item-values">
-                        <span class="valor-principal">${statsBase.itensCortados}</span>
-                        <span class="valor-percentual">equivalente a ${statsBase.percentualCortados.toFixed(1)}%</span>
-                    </div>
-                </div>
-                <div class="comparativo-item-detail">
-                    representando um 
-                    <strong class="${indicadorCortados.tipo}">${indicadorCortados.texto}</strong> 
-                    de ${Math.abs(diffCortados).toFixed(1)}% em relação ao período anterior.
-                    <span class="indicador ${indicadorCortados.tipo}">${indicadorCortados.icone}</span>
+                        ITENS CORTADOS:
+                    </span>
+                    <span class="valor-principal">${statsBase.itensCortados}</span>
+                    <span class="valor-percentual">(${statsBase.percentualCortados.toFixed(1)}%)</span>
+                    <span class="comparativo-item-detail">
+                        ${indCortados.texto} de ${Math.abs(diffCortados).toFixed(1)}% vs período anterior
+                    </span>
+                    <span class="indicador">${indCortados.icone}</span>
                 </div>
             </div>
             
-            <div class="comparativo-item ${indicadorAbertos.tipo}">
+            <div class="comparativo-item ${indAbertos.tipo}">
                 <div class="comparativo-item-header">
-                    <div class="comparativo-item-title">
+                    <span class="comparativo-item-title">
                         <i class="fas fa-exclamation-triangle"></i>
-                        <span>ITENS EM ABERTO:</span>
-                    </div>
-                    <div class="comparativo-item-values">
-                        <span class="valor-principal">${statsBase.itensAbertos}</span>
-                        <span class="valor-percentual">equivalente a ${statsBase.percentualAbertos.toFixed(1)}%</span>
-                    </div>
-                </div>
-                <div class="comparativo-item-detail">
-                    representando uma 
-                    <strong class="${indicadorAbertos.tipo}">${indicadorAbertos.texto}</strong> 
-                    de ${Math.abs(diffAbertos).toFixed(1)}% em relação ao período anterior.
-                    <span class="indicador ${indicadorAbertos.tipo}">${indicadorAbertos.icone}</span>
+                        ITENS EM ABERTO:
+                    </span>
+                    <span class="valor-principal">${statsBase.itensAbertos}</span>
+                    <span class="valor-percentual">(${statsBase.percentualAbertos.toFixed(1)}%)</span>
+                    <span class="comparativo-item-detail">
+                        ${indAbertos.texto} de ${Math.abs(diffAbertos).toFixed(1)}% vs período anterior
+                    </span>
+                    <span class="indicador">${indAbertos.icone}</span>
                 </div>
             </div>
             
-            <div class="comparativo-item ${indicadorAtendidos.tipo}">
+            <div class="comparativo-item ${indAtendidos.tipo}">
                 <div class="comparativo-item-header">
-                    <div class="comparativo-item-title">
+                    <span class="comparativo-item-title">
                         <i class="fas fa-check-circle"></i>
-                        <span>ITENS ATENDIDOS:</span>
-                    </div>
-                    <div class="comparativo-item-values">
-                        <span class="valor-principal">${statsBase.itensAtendidos}</span>
-                        <span class="valor-percentual">equivalente a ${statsBase.percentualAtendidos.toFixed(1)}%</span>
-                    </div>
-                </div>
-                <div class="comparativo-item-detail">
-                    indicando uma 
-                    <strong class="${indicadorAtendidos.tipo}">${indicadorAtendidos.texto}</strong> 
-                    de ${Math.abs(diffAtendidos).toFixed(1)}% em relação ao período anterior.
-                    <span class="indicador ${indicadorAtendidos.tipo}">${indicadorAtendidos.icone}</span>
+                        ITENS ATENDIDOS:
+                    </span>
+                    <span class="valor-principal">${statsBase.itensAtendidos}</span>
+                    <span class="valor-percentual">(${statsBase.percentualAtendidos.toFixed(1)}%)</span>
+                    <span class="comparativo-item-detail">
+                        ${indAtendidos.texto} de ${Math.abs(diffAtendidos).toFixed(1)}% vs período anterior
+                    </span>
+                    <span class="indicador">${indAtendidos.icone}</span>
                 </div>
             </div>
             
             <div class="comparativo-footer">
                 <div class="total-info">
-                    <span>Total de Itens Pedidos: <strong>${statsBase.totalItens.toLocaleString('pt-BR')}</strong></span>
-                    <span class="comparativo-data">
-                        ${this.tipoComparativo === 'dia' ? 'Data Base' : 'Mês Base'}: <strong>${periodoBase}</strong>
-                    </span>
+                    <span>Total de Itens: <strong>${statsBase.totalItens.toLocaleString('pt-BR')}</strong></span>
                 </div>
             </div>
         `;
         
-        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     /**
