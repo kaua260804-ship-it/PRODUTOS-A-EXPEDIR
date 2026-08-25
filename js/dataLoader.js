@@ -10,24 +10,28 @@ class DataLoader {
     }
 
     /**
-     * Carrega o arquivo Excel com cache busting
+     * Carrega o arquivo Excel com cache busting agressivo
      */
     async loadExcelFile() {
         try {
             this.isLoading = true;
             this.showProgress(true);
             
-            // Adicionar timestamp para evitar cache
-            const timestamp = new Date().getTime();
-            const filePath = `${CONFIG.EXCEL_FILE_PATH}?t=${timestamp}`;
+            // Gerar timestamp único para cada carregamento
+            const timestamp = Date.now();
+            const random = Math.random().toString(36).substring(7);
+            const filePath = `${CONFIG.EXCEL_FILE_PATH}?t=${timestamp}&r=${random}`;
             
             console.log('Carregando arquivo:', filePath);
             
+            // Usar fetch com headers anti-cache
             const response = await fetch(filePath, {
+                method: 'GET',
                 cache: 'no-store',
                 headers: {
-                    'Cache-Control': 'no-cache',
-                    'Pragma': 'no-cache'
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
                 }
             });
             
@@ -40,6 +44,7 @@ class DataLoader {
             
             this.loadAllSheets();
             this.validateSheets();
+            this.validateColumns();
             
             this.updateLastUpdate();
             this.showProgress(false);
@@ -82,6 +87,63 @@ class DataLoader {
     }
 
     /**
+     * Valida se as colunas necessárias existem
+     */
+    validateColumns() {
+        const warnings = [];
+        
+        // Verificar colunas da aba GERAL
+        const geralData = this.sheetsData[CONFIG.SHEETS.GERAL] || [];
+        if (geralData.length > 0) {
+            const geralColumns = Object.keys(geralData[0]);
+            const requiredGeral = ['NRO DO PEDIDO', 'CODIGO', 'EMPRESA', 'DATA'];
+            
+            requiredGeral.forEach(col => {
+                if (!geralColumns.includes(col)) {
+                    warnings.push(`Coluna "${col}" não encontrada na aba GERAL`);
+                }
+            });
+        }
+        
+        // Verificar colunas da aba CORTE
+        const corteData = this.sheetsData[CONFIG.SHEETS.CORTE] || [];
+        if (corteData.length > 0) {
+            const corteColumns = Object.keys(corteData[0]);
+            console.log('Colunas disponíveis na aba CORTE:', corteColumns);
+            
+            // Verificar se tem CAD ou as colunas para criar
+            const hasCAD = corteColumns.includes('CAD');
+            const hasNroPedido = corteColumns.includes('NRO DO PEDIDO');
+            const hasCodigo = corteColumns.includes('CODIGO');
+            const hasEmpresa = corteColumns.includes('EMPRESA');
+            
+            if (!hasCAD && !(hasNroPedido && hasCodigo && hasEmpresa)) {
+                warnings.push('Aba CORTE não tem coluna CAD nem as colunas NRO DO PEDIDO, CODIGO, EMPRESA');
+            }
+        }
+        
+        // Verificar colunas da aba ABERTO
+        const abertoData = this.sheetsData[CONFIG.SHEETS.ABERTO] || [];
+        if (abertoData.length > 0) {
+            const abertoColumns = Object.keys(abertoData[0]);
+            console.log('Colunas disponíveis na aba ABERTO:', abertoColumns);
+            
+            const hasCAD = abertoColumns.includes('CAD');
+            const hasNroPedido = abertoColumns.includes('NRO DO PEDIDO');
+            const hasCodigo = abertoColumns.includes('CODIGO');
+            const hasEmpresa = abertoColumns.includes('EMPRESA');
+            
+            if (!hasCAD && !(hasNroPedido && hasCodigo && hasEmpresa)) {
+                warnings.push('Aba ABERTO não tem coluna CAD nem as colunas NRO DO PEDIDO, CODIGO, EMPRESA');
+            }
+        }
+        
+        if (warnings.length > 0) {
+            console.warn('Avisos de validação:', warnings);
+        }
+    }
+
+    /**
      * Atualiza o indicador de última atualização
      */
     updateLastUpdate() {
@@ -103,7 +165,6 @@ class DataLoader {
             document.getElementById('progressFill').style.width = '0%';
             document.getElementById('progressText').textContent = 'Carregando dados...';
             
-            // Animar progresso
             let progress = 0;
             const interval = setInterval(() => {
                 progress += 10;
