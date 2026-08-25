@@ -16,9 +16,6 @@ class Table {
         this.initializeEventListeners();
     }
 
-    /**
-     * Inicializa os event listeners
-     */
     initializeEventListeners() {
         document.getElementById('btnPrev').addEventListener('click', () => {
             this.previousPage();
@@ -65,11 +62,7 @@ class Table {
         });
     }
 
-    /**
-     * Define os dados a serem exibidos
-     */
     setData(data) {
-        console.log('Definindo dados na tabela:', data.length, 'registros');
         this.currentData = data || [];
         this.currentPage = 1;
         
@@ -81,13 +74,9 @@ class Table {
         this.render();
     }
 
-    /**
-     * Obtém os dados filtrados e pesquisados
-     */
     getFilteredData() {
         let data = [...this.currentData];
         
-        // Aplicar busca global
         if (this.globalSearchTerm) {
             const searchTerm = this.globalSearchTerm.toLowerCase();
             data = data.filter(row => {
@@ -97,7 +86,6 @@ class Table {
             });
         }
         
-        // Aplicar ordenação
         if (this.sortColumn) {
             data.sort((a, b) => {
                 const aVal = a[this.sortColumn] || '';
@@ -114,9 +102,6 @@ class Table {
         return data;
     }
 
-    /**
-     * Renderiza a tabela
-     */
     render() {
         const filteredData = this.getFilteredData();
         this.totalPages = Math.ceil(filteredData.length / this.recordsPerPage);
@@ -140,13 +125,8 @@ class Table {
         this.updatePagination(filteredData.length);
         this.updateRecordCount(filteredData.length);
         this.renderPageNumbers();
-        
-        console.log(`Página ${this.currentPage} de ${this.totalPages} - Mostrando ${pageData.length} registros`);
     }
 
-    /**
-     * Renderiza o cabeçalho da tabela
-     */
     renderHeader() {
         const thead = document.getElementById('tableHead');
         const columns = this.getTableColumns();
@@ -161,7 +141,6 @@ class Table {
             </th>`;
         }).join('') + '</tr>';
         
-        // Adicionar event listeners de ordenação
         thead.querySelectorAll('th').forEach(th => {
             th.addEventListener('click', () => {
                 this.handleSort(th.dataset.column);
@@ -169,9 +148,6 @@ class Table {
         });
     }
 
-    /**
-     * Obtém as colunas da tabela - SEM colunas duplicadas
-     */
     getTableColumns() {
         return [
             { key: 'NRO DO PEDIDO', label: 'Nº Pedido' },
@@ -185,9 +161,9 @@ class Table {
             { key: 'TOTAL QND UND VENDA', label: 'Total Qnd Und Venda' },
             { key: 'QTD EXPEDIR', label: 'Qtd Expedir' },
             { key: 'ESTOQUE DISPONIVEL', label: 'Estoque Disponível' },
-            { key: 'CATEGORIA', label: 'Categoria' }, // Agora vem do NIVEL 1
-            { key: 'GRUPO', label: 'Grupo' }, // Agora vem do NIVEL 2
-            { key: 'SUBGRUPO', label: 'Subgrupo' }, // Agora vem do NIVEL 3
+            { key: 'CATEGORIA', label: 'Categoria' },
+            { key: 'GRUPO', label: 'Grupo' },
+            { key: 'SUBGRUPO', label: 'Subgrupo' },
             { key: 'DATA', label: 'Data' },
             { key: 'EST DISPONIVEL', label: 'Est Disponível' },
             { key: 'CUSTO', label: 'Custo' },
@@ -196,9 +172,6 @@ class Table {
         ];
     }
 
-    /**
-     * Renderiza o corpo da tabela
-     */
     renderBody(data) {
         const tbody = document.getElementById('tableBody');
         const noData = document.getElementById('noData');
@@ -224,12 +197,10 @@ class Table {
                         return `<td><span class="status-badge ${statusClass}">${value || ''}</span></td>`;
                     }
                     
-                    // Formatar data
                     if (col.key === 'DATA' && value) {
-                        return `<td>${this.formatDate(value)}</td>`;
+                        return `<td>${this.dataProcessor.formatDateDisplay(value)}</td>`;
                     }
                     
-                    // Formatar números
                     let displayValue = value;
                     if (typeof value === 'number') {
                         displayValue = value.toLocaleString('pt-BR');
@@ -241,28 +212,6 @@ class Table {
         }).join('');
     }
 
-    /**
-     * Formata data
-     */
-    formatDate(value) {
-        // Se for número serial do Excel
-        if (typeof value === 'number') {
-            const date = new Date(Math.round((value - 25569) * 86400 * 1000));
-            return date.toLocaleDateString('pt-BR');
-        }
-        
-        // Se for string, tenta converter
-        const date = new Date(value);
-        if (!isNaN(date.getTime())) {
-            return date.toLocaleDateString('pt-BR');
-        }
-        
-        return value;
-    }
-
-    /**
-     * Atualiza a paginação
-     */
     updatePagination(totalRecords) {
         document.getElementById('currentPage').textContent = this.currentPage;
         document.getElementById('totalPages').textContent = this.totalPages;
@@ -275,9 +224,6 @@ class Table {
         document.getElementById('btnLast').disabled = this.currentPage >= this.totalPages;
     }
 
-    /**
-     * Renderiza os números das páginas
-     */
     renderPageNumbers() {
         const container = document.getElementById('pageNumbers');
         const maxVisible = 7;
@@ -315,16 +261,10 @@ class Table {
         }).join('');
     }
 
-    /**
-     * Atualiza a contagem de registros
-     */
     updateRecordCount(totalRecords) {
         document.getElementById('recordCount').textContent = `${totalRecords} registros`;
     }
 
-    /**
-     * Vai para uma página específica
-     */
     goToPage(page) {
         if (page >= 1 && page <= this.totalPages) {
             this.currentPage = page;
@@ -332,23 +272,14 @@ class Table {
         }
     }
 
-    /**
-     * Vai para a primeira página
-     */
     firstPage() {
         this.goToPage(1);
     }
 
-    /**
-     * Vai para a última página
-     */
     lastPage() {
         this.goToPage(this.totalPages);
     }
 
-    /**
-     * Vai para a página anterior
-     */
     previousPage() {
         if (this.currentPage > 1) {
             this.currentPage--;
@@ -356,9 +287,6 @@ class Table {
         }
     }
 
-    /**
-     * Vai para a próxima página
-     */
     nextPage() {
         if (this.currentPage < this.totalPages) {
             this.currentPage++;
@@ -366,9 +294,6 @@ class Table {
         }
     }
 
-    /**
-     * Pula para uma página específica
-     */
     jumpToPage() {
         const input = document.getElementById('pageJumpInput');
         const page = parseInt(input.value);
@@ -381,9 +306,6 @@ class Table {
         }
     }
 
-    /**
-     * Manipula a ordenação
-     */
     handleSort(column) {
         if (this.sortColumn === column) {
             this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';

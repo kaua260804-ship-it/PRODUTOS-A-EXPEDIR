@@ -21,13 +21,9 @@ class Filters {
         this.populateFilterOptions();
     }
 
-    /**
-     * Inicializa os event listeners dos filtros
-     */
     initializeEventListeners() {
         document.getElementById('filterData').addEventListener('change', (e) => {
             this.filters.data = e.target.value;
-            console.log('Filtro de data alterado para:', e.target.value);
             this.applyFilters();
         });
         
@@ -79,54 +75,27 @@ class Filters {
         });
     }
 
-    /**
-     * Popula as opções dos filtros dropdown
-     */
     populateFilterOptions() {
-        console.log('========================================');
-        console.log('POPULANDO FILTROS:');
-        console.log('========================================');
-        
-        // Datas (formatadas)
         const datas = this.dataProcessor.getUniqueValues('DATA');
-        console.log(`Datas encontradas para filtro (${datas.length}):`);
-        datas.forEach((data, index) => {
-            console.log(`  ${index + 1}. Valor original: "${data}" | Formatada: ${this.formatDateDisplay(data)}`);
-        });
-        
         this.populateSelect('filterData', datas, true);
         
-        // Empresas
         const empresas = this.dataProcessor.getUniqueValues('EMPRESA');
-        console.log(`Empresas encontradas (${empresas.length})`);
         this.populateSelect('filterEmpresa', empresas);
         
-        // Categorias
         const categorias = this.dataProcessor.getUniqueValues('CATEGORIA');
-        console.log(`Categorias encontradas (${categorias.length})`);
         this.populateSelect('filterCategoria', categorias);
         
-        // Grupos
         const grupos = this.dataProcessor.getUniqueValues('GRUPO');
-        console.log(`Grupos encontrados (${grupos.length})`);
         this.populateSelect('filterGrupo', grupos);
         
-        // Subgrupos
         const subgrupos = this.dataProcessor.getUniqueValues('SUBGRUPO');
-        console.log(`Subgrupos encontrados (${subgrupos.length})`);
         this.populateSelect('filterSubgrupo', subgrupos);
-        
-        console.log('========================================');
     }
 
-    /**
-     * Popula um select com opções
-     */
     populateSelect(selectId, values, isDate = false) {
         const select = document.getElementById(selectId);
         const currentValue = select.value;
         
-        // Manter a primeira opção
         const firstOption = select.options[0];
         select.innerHTML = '';
         select.appendChild(firstOption);
@@ -136,7 +105,7 @@ class Filters {
             option.value = value;
             
             if (isDate) {
-                option.textContent = this.formatDateDisplay(value);
+                option.textContent = this.dataProcessor.formatDateDisplay(value);
             } else {
                 option.textContent = value;
             }
@@ -145,35 +114,8 @@ class Filters {
         });
         
         select.value = currentValue;
-        
-        console.log(`Select "${selectId}" populado com ${values.length} opções`);
     }
 
-    /**
-     * Formata data para exibição
-     */
-    formatDateDisplay(dataStr) {
-        // Se for número serial do Excel
-        if (typeof dataStr === 'number' || !isNaN(dataStr)) {
-            const numData = parseFloat(dataStr);
-            if (numData > 40000 && numData < 60000) {
-                const date = new Date(Math.round((numData - 25569) * 86400 * 1000));
-                return date.toLocaleDateString('pt-BR');
-            }
-        }
-        
-        // Tentar diferentes formatos
-        const date = new Date(dataStr);
-        if (!isNaN(date.getTime())) {
-            return date.toLocaleDateString('pt-BR');
-        }
-        
-        return dataStr;
-    }
-
-    /**
-     * Mostra autocomplete
-     */
     showAutocomplete(field, value) {
         const containerId = `autocomplete${field.charAt(0).toUpperCase() + field.slice(1)}`;
         const container = document.getElementById(containerId);
@@ -218,54 +160,40 @@ class Filters {
         }
     }
 
-    /**
-     * Aplica os filtros aos dados
-     */
     applyFilters() {
-        const dataAntes = this.filteredData.length;
-        
         this.filteredData = this.dataProcessor.processedData.filter(row => {
-            // Filtro por data
             if (this.filters.data && row['DATA']?.toString() !== this.filters.data) {
                 return false;
             }
             
-            // Filtro por empresa
             if (this.filters.empresa && row['EMPRESA']?.toString() !== this.filters.empresa) {
                 return false;
             }
             
-            // Filtro por pedido
             if (this.filters.pedido && !row['NRO DO PEDIDO']?.toString().toLowerCase().includes(this.filters.pedido.toLowerCase())) {
                 return false;
             }
             
-            // Filtro por código
             if (this.filters.codigo && !row['CODIGO']?.toString().toLowerCase().includes(this.filters.codigo.toLowerCase())) {
                 return false;
             }
             
-            // Filtro por produto
             if (this.filters.produto && !row['PRODUTO']?.toString().toLowerCase().includes(this.filters.produto.toLowerCase())) {
                 return false;
             }
             
-            // Filtro por status
             if (this.filters.status && row['STATUS'] !== this.filters.status) {
                 return false;
             }
             
-            // Filtro por categoria
             if (this.filters.categoria && row['CATEGORIA']?.toString() !== this.filters.categoria) {
                 return false;
             }
             
-            // Filtro por grupo
             if (this.filters.grupo && row['GRUPO']?.toString() !== this.filters.grupo) {
                 return false;
             }
             
-            // Filtro por subgrupo
             if (this.filters.subgrupo && row['SUBGRUPO']?.toString() !== this.filters.subgrupo) {
                 return false;
             }
@@ -273,17 +201,11 @@ class Filters {
             return true;
         });
         
-        console.log(`Filtros aplicados: ${dataAntes} -> ${this.filteredData.length} registros`);
-        
-        // Disparar evento para atualizar tabela e cards
         document.dispatchEvent(new CustomEvent('dataFiltered', {
             detail: { filteredData: this.filteredData }
         }));
     }
 
-    /**
-     * Limpa todos os filtros
-     */
     clearFilters() {
         this.filters = {
             data: '',
@@ -297,7 +219,6 @@ class Filters {
             subgrupo: ''
         };
         
-        // Limpar campos
         document.getElementById('filterData').value = '';
         document.getElementById('filterEmpresa').value = '';
         document.getElementById('filterPedido').value = '';
@@ -308,19 +229,13 @@ class Filters {
         document.getElementById('filterGrupo').value = '';
         document.getElementById('filterSubgrupo').value = '';
         
-        // Limpar autocomplete
         document.getElementById('autocompletePedido').innerHTML = '';
         document.getElementById('autocompleteCodigo').innerHTML = '';
         document.getElementById('autocompleteProduto').innerHTML = '';
         
-        console.log('Todos os filtros foram limpos');
-        
         this.applyFilters();
     }
 
-    /**
-     * Obtém dados filtrados
-     */
     getFilteredData() {
         return this.filteredData.length > 0 ? this.filteredData : this.dataProcessor.processedData;
     }
