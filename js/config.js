@@ -15,40 +15,13 @@ const CONFIG = {
         ESTCD: 'ESTCD'
     },
     
-    // Colunas da aba GERAL
-    GERAL_COLUMNS: {
-        NRO_PEDIDO: 'NRO DO PEDIDO',
-        CODIGO: 'CODIGO',
-        PRODUTO: 'PRODUTO',
-        EMBALAGEM: 'EMBALAGEM',
-        EMPRESA: 'EMPRESA',
-        SALDO: 'SALDO',
-        QTD_DISTRIBUICAO: 'QTD DISTRIBUIÇÃO',
-        TOTAL_QND_UND_VENDA: 'TOTAL QND UND VENDA',
-        QTD_EXPEDIR: 'QTD EXPEDIR',
-        ESTOQUE_DISPONIVEL: 'ESTOQUE DISPONIVEL',
-        CATEGORIA: 'CATEGORIA',
-        GRUPO: 'GRUPO',
-        SUBGRUPO: 'SUBGRUPO',
-        DATA: 'DATA',
-        EST_DISPONIVEL: 'EST DISPONIVEL',
-        CUSTO: 'CUSTO'
-    },
-    
-    // Colunas da aba BS CAD
-    BS_CAD_COLUMNS: {
-        SEQ_PRODUTO: 'SEQ PRODUTO',
-        NIVEL_1: 'NIVEL 1',
-        NIVEL_2: 'NIVEL 2',
-        NIVEL_3: 'NIVEL 3',
-        NIVEL_4: 'NIVEL 4'
-    },
-    
-    // Colunas da aba ESTCD
-    ESTCD_COLUMNS: {
-        CODIGO_PRODUTO: 'Código Produto',
-        QTD_DISPONIVEL: 'Quantidade Disponível',
-        PRECO_VDA_UNITARIO: 'Preço Vda Unitário'
+    // Colunas obrigatórias
+    REQUIRED_COLUMNS: {
+        GERAL: ['NRO DO PEDIDO', 'CODIGO', 'EMPRESA', 'DATA'],
+        CORTE: ['CAD'], // ou ['NRO DO PEDIDO', 'CODIGO', 'EMPRESA']
+        ABERTO: ['CAD'], // ou ['NRO DO PEDIDO', 'CODIGO', 'EMPRESA']
+        BS_CAD: ['SEQ PRODUTO', 'NIVEL 1', 'NIVEL 2', 'NIVEL 3'],
+        ESTCD: ['Código Produto']
     },
     
     // Configurações de paginação
@@ -61,13 +34,6 @@ const CONFIG = {
         CORTE: 'CORTE',
         ABERTO: 'ABERTO',
         EXPEDIDO: 'EXPEDIDO'
-    },
-    
-    // Cores por status
-    STATUS_COLORS: {
-        CORTE: '#e74c3c',
-        ABERTO: '#f39c12',
-        EXPEDIDO: '#27ae60'
     }
 };
 
