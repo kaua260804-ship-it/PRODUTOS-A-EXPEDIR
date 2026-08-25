@@ -25,6 +25,18 @@ class DataProcessor {
         // Log das colunas disponíveis
         console.log('Colunas disponíveis na aba GERAL:', Object.keys(firstRow));
         
+        // Verificar colunas das outras abas
+        const corteData = this.sheetsData[CONFIG.SHEETS.CORTE] || [];
+        const abertoData = this.sheetsData[CONFIG.SHEETS.ABERTO] || [];
+        
+        if (corteData.length > 0) {
+            console.log('Colunas disponíveis na aba CORTE:', Object.keys(corteData[0]));
+        }
+        
+        if (abertoData.length > 0) {
+            console.log('Colunas disponíveis na aba ABERTO:', Object.keys(abertoData[0]));
+        }
+        
         return {
             NRO_PEDIDO: 'NRO DO PEDIDO',
             CODIGO: 'CODIGO',
@@ -36,9 +48,6 @@ class DataProcessor {
             TOTAL_QND_UND_VENDA: 'TOTAL QND UND VENDA',
             QTD_EXPEDIR: 'QTD EXPEDIR',
             ESTOQUE_DISPONIVEL: 'ESTOQUE DISPONIVEL',
-            CATEGORIA: 'CATEGORIA', // Será removida depois
-            GRUPO: 'GRUPO', // Será removida depois
-            SUBGRUPO: 'SUBGRUPO', // Será removida depois
             DATA: 'DATA',
             EST_DISPONIVEL: 'EST DISPONIVEL',
             CUSTO: 'CUSTO'
@@ -58,45 +67,98 @@ class DataProcessor {
         this.processGeralData();
         
         console.log(`Processamento concluído. Total de registros: ${this.processedData.length}`);
-        console.log('Primeiro registro processado:', this.processedData[0]);
+        
+        // Verificar se há registros com NRO DO PEDIDO inválido
+        const pedidosInvalidos = this.processedData.filter(row => !row['NRO DO PEDIDO']);
+        if (pedidosInvalidos.length > 0) {
+            console.warn(`Registros com NRO DO PEDIDO inválido: ${pedidosInvalidos.length}`);
+        }
+        
+        // Mostrar exemplo
+        if (this.processedData.length > 0) {
+            console.log('Exemplo de registro processado:', this.processedData[0]);
+        }
         
         return this.processedData;
     }
 
     /**
      * Constrói o conjunto de chaves CAD da aba CORTE
+     * A coluna B na aba CORTE já contém a chave CAD pronta
      */
     buildCorteKeys() {
         const corteData = this.sheetsData[CONFIG.SHEETS.CORTE] || [];
         
-        corteData.forEach(row => {
-            const cad = this.createCADKey(
-                row[this.columnMapping.NRO_PEDIDO],
-                row[this.columnMapping.CODIGO],
-                row[this.columnMapping.EMPRESA]
-            );
-            if (cad) this.corteKeys.add(cad);
+        corteData.forEach((row, index) => {
+            // Verificar se existe uma coluna CAD ou similar (coluna B)
+            let cad = row['CAD'] || row['CHAVE'] || row['CHAVE CAD'];
+            
+            // Se não encontrar, tentar criar a chave
+            if (!cad) {
+                // Tentar com diferentes combinações de colunas
+                const nroPedido = row['NRO DO PEDIDO'] || row['NRO PEDIDO'] || row['PEDIDO'];
+                const codigo = row['CODIGO'] || row['COD'] || row['CÓDIGO'];
+                const empresa = row['EMPRESA'] || row['EMP'];
+                
+                if (nroPedido && codigo && empresa) {
+                    cad = `${nroPedido}-${codigo}-${empresa}`;
+                }
+            }
+            
+            if (cad) {
+                this.corteKeys.add(cad.toString());
+            }
+            
+            // Log do primeiro registro para debug
+            if (index === 0) {
+                console.log('Exemplo de registro CORTE:', row);
+                console.log('Chave CAD extraída:', cad);
+            }
         });
         
         console.log(`Chaves CORTE criadas: ${this.corteKeys.size}`);
+        if (this.corteKeys.size > 0) {
+            console.log('Exemplos de chaves CORTE:', Array.from(this.corteKeys).slice(0, 5));
+        }
     }
 
     /**
      * Constrói o conjunto de chaves CAD da aba ABERTO
+     * A coluna B na aba ABERTO já contém a chave CAD pronta
      */
     buildAbertoKeys() {
         const abertoData = this.sheetsData[CONFIG.SHEETS.ABERTO] || [];
         
-        abertoData.forEach(row => {
-            const cad = this.createCADKey(
-                row[this.columnMapping.NRO_PEDIDO],
-                row[this.columnMapping.CODIGO],
-                row[this.columnMapping.EMPRESA]
-            );
-            if (cad) this.abertoKeys.add(cad);
+        abertoData.forEach((row, index) => {
+            // Verificar se existe uma coluna CAD ou similar (coluna B)
+            let cad = row['CAD'] || row['CHAVE'] || row['CHAVE CAD'];
+            
+            // Se não encontrar, tentar criar a chave
+            if (!cad) {
+                const nroPedido = row['NRO DO PEDIDO'] || row['NRO PEDIDO'] || row['PEDIDO'];
+                const codigo = row['CODIGO'] || row['COD'] || row['CÓDIGO'];
+                const empresa = row['EMPRESA'] || row['EMP'];
+                
+                if (nroPedido && codigo && empresa) {
+                    cad = `${nroPedido}-${codigo}-${empresa}`;
+                }
+            }
+            
+            if (cad) {
+                this.abertoKeys.add(cad.toString());
+            }
+            
+            // Log do primeiro registro para debug
+            if (index === 0) {
+                console.log('Exemplo de registro ABERTO:', row);
+                console.log('Chave CAD extraída:', cad);
+            }
         });
         
         console.log(`Chaves ABERTO criadas: ${this.abertoKeys.size}`);
+        if (this.abertoKeys.size > 0) {
+            console.log('Exemplos de chaves ABERTO:', Array.from(this.abertoKeys).slice(0, 5));
+        }
     }
 
     /**
@@ -104,11 +166,8 @@ class DataProcessor {
      */
     buildBsCadMap() {
         const bsCadData = this.sheetsData[CONFIG.SHEETS.BS_CAD] || [];
-        const firstRow = bsCadData[0] || {};
-        console.log('Colunas disponíveis na aba BS CAD:', Object.keys(firstRow));
         
         bsCadData.forEach(row => {
-            // Tentar diferentes nomes de colunas
             const seqProduto = row['SEQ PRODUTO'] || row['SEQPRODUTO'] || row['CÓDIGO'] || row['CODIGO'];
             const nivel1 = row['NIVEL 1'] || row['NIVEL1'] || row['NÍVEL 1'];
             const nivel2 = row['NIVEL 2'] || row['NIVEL2'] || row['NÍVEL 2'];
@@ -128,9 +187,6 @@ class DataProcessor {
         });
         
         console.log(`Mapa BS CAD criado: ${this.bsCadMap.size} registros`);
-        if (this.bsCadMap.size > 0) {
-            console.log('Exemplo BS CAD:', this.bsCadMap.entries().next().value);
-        }
     }
 
     /**
@@ -138,11 +194,8 @@ class DataProcessor {
      */
     buildEstcdMap() {
         const estcdData = this.sheetsData[CONFIG.SHEETS.ESTCD] || [];
-        const firstRow = estcdData[0] || {};
-        console.log('Colunas disponíveis na aba ESTCD:', Object.keys(firstRow));
         
         estcdData.forEach(row => {
-            // Tentar diferentes nomes de colunas
             const codigoProduto = row['Código Produto'] || row['Código'] || row['CODIGO'] || row['Codigo Produto'];
             const qtdDisponivel = row['Quantidade Disponível'] || row['QTD DISPONIVEL'] || row['Qtd Disponível'];
             const precoVdaUnitario = row['Preço Vda Unitário'] || row['PRECO VDA UNITARIO'] || row['Preço Unitário'];
@@ -156,9 +209,6 @@ class DataProcessor {
         });
         
         console.log(`Mapa ESTCD criado: ${this.estcdMap.size} registros`);
-        if (this.estcdMap.size > 0) {
-            console.log('Exemplo ESTCD:', this.estcdMap.entries().next().value);
-        }
     }
 
     /**
@@ -173,9 +223,10 @@ class DataProcessor {
             const codigo = row[this.columnMapping.CODIGO];
             const empresa = row[this.columnMapping.EMPRESA];
             
+            // Criar chave CAD usando a fórmula: =[@[NRO DO PEDIDO]]&"-"&[@CODIGO]&"-"&[@EMPRESA]
             const cad = this.createCADKey(nroPedido, codigo, empresa);
             
-            // Determinar status
+            // Determinar status usando a fórmula: =SE(CONT.SE(CORTE!B:B;[@CAD])>0;"CORTE";SE(CONT.SE(ABERTO!B:B;[@CAD])>0;"ABERTO";"EXPEDIDO"))
             let status = CONFIG.STATUS.EXPEDIDO;
             if (cad && this.corteKeys.has(cad)) {
                 status = CONFIG.STATUS.CORTE;
@@ -190,10 +241,8 @@ class DataProcessor {
             // Buscar dados do ESTCD
             const estcdData = this.estcdMap.get(codigoStr) || {};
             
-            // Criar objeto processado com todos os campos
-            // Usar NIVEL 1, 2, 3 como CATEGORIA, GRUPO, SUBGRUPO
+            // Criar objeto processado
             return {
-                // Campos originais
                 'NRO DO PEDIDO': nroPedido,
                 'CODIGO': codigo,
                 'PRODUTO': row[this.columnMapping.PRODUTO],
@@ -207,17 +256,11 @@ class DataProcessor {
                 'DATA': row[this.columnMapping.DATA],
                 'EST DISPONIVEL': row[this.columnMapping.EST_DISPONIVEL],
                 'CUSTO': row[this.columnMapping.CUSTO],
-                
-                // Campos calculados
                 'CAD': cad,
                 'STATUS': status,
-                
-                // Usar NIVEL como CATEGORIA, GRUPO, SUBGRUPO
                 'CATEGORIA': bsCadData.nivel1 || '',
                 'GRUPO': bsCadData.nivel2 || '',
                 'SUBGRUPO': bsCadData.nivel3 || '',
-                
-                // Campos adicionais
                 'NIVEL_4': bsCadData.nivel4 || '',
                 'NIVEL_5': bsCadData.nivel5 || '',
                 'QTD_DISPONIVEL_CD': estcdData.qtdDisponivel || 0,
@@ -226,13 +269,11 @@ class DataProcessor {
         });
         
         console.log(`Dados processados: ${this.processedData.length} registros`);
-        if (this.processedData.length > 0) {
-            console.log('Exemplo de registro processado:', this.processedData[0]);
-        }
     }
 
     /**
      * Cria a chave CAD
+     * Fórmula: =[@[NRO DO PEDIDO]]&"-"&[@CODIGO]&"-"&[@EMPRESA]
      */
     createCADKey(nroPedido, codigo, empresa) {
         if (nroPedido === undefined || nroPedido === null || 
@@ -240,7 +281,13 @@ class DataProcessor {
             empresa === undefined || empresa === null) {
             return null;
         }
-        return `${nroPedido}-${codigo}-${empresa}`;
+        
+        // Garantir que os valores sejam strings e remover espaços extras
+        const pedidoStr = nroPedido.toString().trim();
+        const codigoStr = codigo.toString().trim();
+        const empresaStr = empresa.toString().trim();
+        
+        return `${pedidoStr}-${codigoStr}-${empresaStr}`;
     }
 
     /**
@@ -261,26 +308,26 @@ class DataProcessor {
 
     /**
      * Obtém estatísticas dos dados processados
+     * CONTAGEM NORMAL (não distinta)
      */
     getStatistics(filteredData = null) {
         const data = filteredData || this.processedData;
         
-        const totalSKUs = new Set(data.map(row => row['CODIGO'])).size;
-        const totalItems = data.length;
+        // Contagem normal de itens (não distinta)
+        const totalItens = data.length;
         
         const abertoItems = data.filter(row => row['STATUS'] === CONFIG.STATUS.ABERTO).length;
         const corteItems = data.filter(row => row['STATUS'] === CONFIG.STATUS.CORTE).length;
         const expedidoItems = data.filter(row => row['STATUS'] === CONFIG.STATUS.EXPEDIDO).length;
         
         return {
-            totalSKUs,
-            totalItems,
+            totalItens,
             abertoItems,
             corteItems,
             expedidoItems,
-            abertoPercent: totalItems > 0 ? (abertoItems / totalItems) * 100 : 0,
-            cortePercent: totalItems > 0 ? (corteItems / totalItems) * 100 : 0,
-            expedidoPercent: totalItems > 0 ? (expedidoItems / totalItems) * 100 : 0
+            abertoPercent: totalItens > 0 ? (abertoItems / totalItens) * 100 : 0,
+            cortePercent: totalItens > 0 ? (corteItems / totalItens) * 100 : 0,
+            expedidoPercent: totalItens > 0 ? (expedidoItems / totalItens) * 100 : 0
         };
     }
 }
