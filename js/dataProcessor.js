@@ -23,19 +23,34 @@ class DataProcessor {
         const firstRow = geralData[0] || {};
         
         // Log das colunas disponíveis
-        console.log('Colunas disponíveis na aba GERAL:', Object.keys(firstRow));
+        console.log('========================================');
+        console.log('COLUNAS DISPONÍVEIS:');
+        console.log('========================================');
+        console.log('Colunas na aba GERAL:', Object.keys(firstRow));
         
         // Verificar colunas das outras abas
         const corteData = this.sheetsData[CONFIG.SHEETS.CORTE] || [];
         const abertoData = this.sheetsData[CONFIG.SHEETS.ABERTO] || [];
+        const bsCadData = this.sheetsData[CONFIG.SHEETS.BS_CAD] || [];
+        const estcdData = this.sheetsData[CONFIG.SHEETS.ESTCD] || [];
         
         if (corteData.length > 0) {
-            console.log('Colunas disponíveis na aba CORTE:', Object.keys(corteData[0]));
+            console.log('Colunas na aba CORTE:', Object.keys(corteData[0]));
         }
         
         if (abertoData.length > 0) {
-            console.log('Colunas disponíveis na aba ABERTO:', Object.keys(abertoData[0]));
+            console.log('Colunas na aba ABERTO:', Object.keys(abertoData[0]));
         }
+        
+        if (bsCadData.length > 0) {
+            console.log('Colunas na aba BS CAD:', Object.keys(bsCadData[0]));
+        }
+        
+        if (estcdData.length > 0) {
+            console.log('Colunas na aba ESTCD:', Object.keys(estcdData[0]));
+        }
+        
+        console.log('========================================');
         
         return {
             NRO_PEDIDO: 'NRO DO PEDIDO',
@@ -58,7 +73,11 @@ class DataProcessor {
      * Processa todos os dados
      */
     process() {
-        console.log('Iniciando processamento dos dados...');
+        console.log('========================================');
+        console.log('INICIANDO PROCESSAMENTO DOS DADOS');
+        console.log('========================================');
+        console.log('Data e hora:', new Date().toLocaleString('pt-BR'));
+        console.log('========================================');
         
         this.buildCorteKeys();
         this.buildAbertoKeys();
@@ -66,7 +85,10 @@ class DataProcessor {
         this.buildEstcdMap();
         this.processGeralData();
         
-        console.log(`Processamento concluído. Total de registros: ${this.processedData.length}`);
+        console.log('========================================');
+        console.log('PROCESSAMENTO CONCLUÍDO');
+        console.log('========================================');
+        console.log('Total de registros processados:', this.processedData.length);
         
         // Verificar se há registros com NRO DO PEDIDO inválido
         const pedidosInvalidos = this.processedData.filter(row => !row['NRO DO PEDIDO']);
@@ -76,8 +98,14 @@ class DataProcessor {
         
         // Mostrar exemplo
         if (this.processedData.length > 0) {
-            console.log('Exemplo de registro processado:', this.processedData[0]);
+            console.log('Exemplo de registro processado:');
+            console.log(this.processedData[0]);
         }
+        
+        // Log das datas
+        this.logDatesInfo();
+        
+        console.log('========================================');
         
         return this.processedData;
     }
@@ -89,14 +117,19 @@ class DataProcessor {
     buildCorteKeys() {
         const corteData = this.sheetsData[CONFIG.SHEETS.CORTE] || [];
         
+        console.log('========================================');
+        console.log('PROCESSANDO ABA CORTE:');
+        console.log('========================================');
+        console.log('Total de registros na aba CORTE:', corteData.length);
+        
         corteData.forEach((row, index) => {
             // Verificar se existe uma coluna CAD ou similar (coluna B)
-            let cad = row['CAD'] || row['CHAVE'] || row['CHAVE CAD'];
+            let cad = row['CAD'] || row['CHAVE'] || row['CHAVE CAD'] || row['CADASTRO'];
             
             // Se não encontrar, tentar criar a chave
             if (!cad) {
                 // Tentar com diferentes combinações de colunas
-                const nroPedido = row['NRO DO PEDIDO'] || row['NRO PEDIDO'] || row['PEDIDO'];
+                const nroPedido = row['NRO DO PEDIDO'] || row['NRO PEDIDO'] || row['PEDIDO'] || row['Nº PEDIDO'];
                 const codigo = row['CODIGO'] || row['COD'] || row['CÓDIGO'];
                 const empresa = row['EMPRESA'] || row['EMP'];
                 
@@ -111,15 +144,29 @@ class DataProcessor {
             
             // Log do primeiro registro para debug
             if (index === 0) {
-                console.log('Exemplo de registro CORTE:', row);
+                console.log('Primeiro registro da aba CORTE:');
+                console.log(row);
+                console.log('Chave CAD extraída:', cad);
+            }
+            
+            // Log do segundo registro
+            if (index === 1) {
+                console.log('Segundo registro da aba CORTE:');
+                console.log(row);
                 console.log('Chave CAD extraída:', cad);
             }
         });
         
-        console.log(`Chaves CORTE criadas: ${this.corteKeys.size}`);
+        console.log(`Total de chaves CORTE criadas: ${this.corteKeys.size}`);
+        
         if (this.corteKeys.size > 0) {
-            console.log('Exemplos de chaves CORTE:', Array.from(this.corteKeys).slice(0, 5));
+            console.log('Exemplos de chaves CORTE:');
+            Array.from(this.corteKeys).slice(0, 5).forEach(chave => {
+                console.log(`  - ${chave}`);
+            });
         }
+        
+        console.log('========================================');
     }
 
     /**
@@ -129,13 +176,18 @@ class DataProcessor {
     buildAbertoKeys() {
         const abertoData = this.sheetsData[CONFIG.SHEETS.ABERTO] || [];
         
+        console.log('========================================');
+        console.log('PROCESSANDO ABA ABERTO:');
+        console.log('========================================');
+        console.log('Total de registros na aba ABERTO:', abertoData.length);
+        
         abertoData.forEach((row, index) => {
             // Verificar se existe uma coluna CAD ou similar (coluna B)
-            let cad = row['CAD'] || row['CHAVE'] || row['CHAVE CAD'];
+            let cad = row['CAD'] || row['CHAVE'] || row['CHAVE CAD'] || row['CADASTRO'];
             
             // Se não encontrar, tentar criar a chave
             if (!cad) {
-                const nroPedido = row['NRO DO PEDIDO'] || row['NRO PEDIDO'] || row['PEDIDO'];
+                const nroPedido = row['NRO DO PEDIDO'] || row['NRO PEDIDO'] || row['PEDIDO'] || row['Nº PEDIDO'];
                 const codigo = row['CODIGO'] || row['COD'] || row['CÓDIGO'];
                 const empresa = row['EMPRESA'] || row['EMP'];
                 
@@ -150,15 +202,29 @@ class DataProcessor {
             
             // Log do primeiro registro para debug
             if (index === 0) {
-                console.log('Exemplo de registro ABERTO:', row);
+                console.log('Primeiro registro da aba ABERTO:');
+                console.log(row);
+                console.log('Chave CAD extraída:', cad);
+            }
+            
+            // Log do segundo registro
+            if (index === 1) {
+                console.log('Segundo registro da aba ABERTO:');
+                console.log(row);
                 console.log('Chave CAD extraída:', cad);
             }
         });
         
-        console.log(`Chaves ABERTO criadas: ${this.abertoKeys.size}`);
+        console.log(`Total de chaves ABERTO criadas: ${this.abertoKeys.size}`);
+        
         if (this.abertoKeys.size > 0) {
-            console.log('Exemplos de chaves ABERTO:', Array.from(this.abertoKeys).slice(0, 5));
+            console.log('Exemplos de chaves ABERTO:');
+            Array.from(this.abertoKeys).slice(0, 5).forEach(chave => {
+                console.log(`  - ${chave}`);
+            });
         }
+        
+        console.log('========================================');
     }
 
     /**
@@ -167,7 +233,12 @@ class DataProcessor {
     buildBsCadMap() {
         const bsCadData = this.sheetsData[CONFIG.SHEETS.BS_CAD] || [];
         
-        bsCadData.forEach(row => {
+        console.log('========================================');
+        console.log('PROCESSANDO ABA BS CAD:');
+        console.log('========================================');
+        console.log('Total de registros:', bsCadData.length);
+        
+        bsCadData.forEach((row, index) => {
             const seqProduto = row['SEQ PRODUTO'] || row['SEQPRODUTO'] || row['CÓDIGO'] || row['CODIGO'];
             const nivel1 = row['NIVEL 1'] || row['NIVEL1'] || row['NÍVEL 1'];
             const nivel2 = row['NIVEL 2'] || row['NIVEL2'] || row['NÍVEL 2'];
@@ -184,9 +255,30 @@ class DataProcessor {
                     nivel5: nivel5 || ''
                 });
             }
+            
+            // Log do primeiro registro
+            if (index === 0) {
+                console.log('Primeiro registro BS CAD:');
+                console.log(row);
+                console.log('Mapeado como:', {
+                    seqProduto: seqProduto?.toString(),
+                    nivel1: nivel1,
+                    nivel2: nivel2,
+                    nivel3: nivel3
+                });
+            }
         });
         
         console.log(`Mapa BS CAD criado: ${this.bsCadMap.size} registros`);
+        
+        if (this.bsCadMap.size > 0) {
+            console.log('Exemplo do mapa BS CAD:');
+            const exemplo = this.bsCadMap.entries().next().value;
+            console.log(`  Chave: ${exemplo[0]}`);
+            console.log(`  Valor:`, exemplo[1]);
+        }
+        
+        console.log('========================================');
     }
 
     /**
@@ -195,7 +287,12 @@ class DataProcessor {
     buildEstcdMap() {
         const estcdData = this.sheetsData[CONFIG.SHEETS.ESTCD] || [];
         
-        estcdData.forEach(row => {
+        console.log('========================================');
+        console.log('PROCESSANDO ABA ESTCD:');
+        console.log('========================================');
+        console.log('Total de registros:', estcdData.length);
+        
+        estcdData.forEach((row, index) => {
             const codigoProduto = row['Código Produto'] || row['Código'] || row['CODIGO'] || row['Codigo Produto'];
             const qtdDisponivel = row['Quantidade Disponível'] || row['QTD DISPONIVEL'] || row['Qtd Disponível'];
             const precoVdaUnitario = row['Preço Vda Unitário'] || row['PRECO VDA UNITARIO'] || row['Preço Unitário'];
@@ -206,9 +303,29 @@ class DataProcessor {
                     precoVdaUnitario: precoVdaUnitario || 0
                 });
             }
+            
+            // Log do primeiro registro
+            if (index === 0) {
+                console.log('Primeiro registro ESTCD:');
+                console.log(row);
+                console.log('Mapeado como:', {
+                    codigo: codigoProduto?.toString(),
+                    qtdDisponivel: qtdDisponivel,
+                    preco: precoVdaUnitario
+                });
+            }
         });
         
         console.log(`Mapa ESTCD criado: ${this.estcdMap.size} registros`);
+        
+        if (this.estcdMap.size > 0) {
+            console.log('Exemplo do mapa ESTCD:');
+            const exemplo = this.estcdMap.entries().next().value;
+            console.log(`  Chave: ${exemplo[0]}`);
+            console.log(`  Valor:`, exemplo[1]);
+        }
+        
+        console.log('========================================');
     }
 
     /**
@@ -216,6 +333,23 @@ class DataProcessor {
      */
     processGeralData() {
         const geralData = this.sheetsData[CONFIG.SHEETS.GERAL] || [];
+        
+        console.log('========================================');
+        console.log('PROCESSANDO ABA GERAL:');
+        console.log('========================================');
+        console.log('Total de registros:', geralData.length);
+        
+        // Log do primeiro registro
+        if (geralData.length > 0) {
+            console.log('Primeiro registro da aba GERAL:');
+            console.log(geralData[0]);
+        }
+        
+        // Log do último registro
+        if (geralData.length > 0) {
+            console.log('Último registro da aba GERAL:');
+            console.log(geralData[geralData.length - 1]);
+        }
         
         this.processedData = geralData.map((row, index) => {
             // Usar o mapeamento de colunas
@@ -226,7 +360,7 @@ class DataProcessor {
             // Criar chave CAD usando a fórmula: =[@[NRO DO PEDIDO]]&"-"&[@CODIGO]&"-"&[@EMPRESA]
             const cad = this.createCADKey(nroPedido, codigo, empresa);
             
-            // Determinar status usando a fórmula: =SE(CONT.SE(CORTE!B:B;[@CAD])>0;"CORTE";SE(CONT.SE(ABERTO!B:B;[@CAD])>0;"ABERTO";"EXPEDIDO"))
+            // Determinar status
             let status = CONFIG.STATUS.EXPEDIDO;
             if (cad && this.corteKeys.has(cad)) {
                 status = CONFIG.STATUS.CORTE;
@@ -269,6 +403,7 @@ class DataProcessor {
         });
         
         console.log(`Dados processados: ${this.processedData.length} registros`);
+        console.log('========================================');
     }
 
     /**
@@ -291,6 +426,89 @@ class DataProcessor {
     }
 
     /**
+     * Log detalhado das datas processadas
+     */
+    logDatesInfo() {
+        console.log('========================================');
+        console.log('ANÁLISE DETALHADA DAS DATAS:');
+        console.log('========================================');
+        
+        const datasUnicas = new Map();
+        const datasDetalhes = {};
+        
+        this.processedData.forEach((row, index) => {
+            const data = row['DATA'];
+            if (data !== undefined && data !== null && data !== '') {
+                const dataStr = data.toString();
+                
+                if (!datasUnicas.has(dataStr)) {
+                    datasUnicas.set(dataStr, {
+                        valorOriginal: data,
+                        tipo: typeof data,
+                        contagem: 0,
+                        primeiroIndex: index,
+                        ultimoIndex: index
+                    });
+                }
+                
+                const info = datasUnicas.get(dataStr);
+                info.contagem++;
+                info.ultimoIndex = index;
+            }
+        });
+        
+        console.log(`Total de datas únicas: ${datasUnicas.size}`);
+        
+        // Ordenar datas
+        const datasOrdenadas = Array.from(datasUnicas.keys()).sort((a, b) => {
+            const numA = parseFloat(a);
+            const numB = parseFloat(b);
+            if (!isNaN(numA) && !isNaN(numB)) {
+                return numA - numB;
+            }
+            return a.localeCompare(b);
+        });
+        
+        console.log('Datas ordenadas (da mais antiga para a mais recente):');
+        
+        datasOrdenadas.forEach((data, index) => {
+            const info = datasUnicas.get(data);
+            let dataLegivel = data;
+            
+            // Tentar converter para data legível
+            if (!isNaN(parseFloat(data))) {
+                const numData = parseFloat(data);
+                if (numData > 40000 && numData < 60000) {
+                    const date = new Date(Math.round((numData - 25569) * 86400 * 1000));
+                    dataLegivel = date.toLocaleDateString('pt-BR');
+                }
+            }
+            
+            console.log(`  ${index + 1}. Valor: "${data}" | Tipo: ${info.tipo} | Data: ${dataLegivel} | Registros: ${info.contagem}`);
+        });
+        
+        // Mostrar as 5 datas mais recentes
+        console.log('As 5 datas mais recentes:');
+        const ultimas5 = datasOrdenadas.slice(-5);
+        ultimas5.forEach(data => {
+            const info = datasUnicas.get(data);
+            let dataLegivel = data;
+            
+            if (!isNaN(parseFloat(data))) {
+                const numData = parseFloat(data);
+                if (numData > 40000 && numData < 60000) {
+                    const date = new Date(Math.round((numData - 25569) * 86400 * 1000));
+                    dataLegivel = date.toLocaleDateString('pt-BR');
+                }
+            }
+            
+            console.log(`  - "${data}" -> ${dataLegivel} (${info.contagem} registros)`);
+        });
+        
+        console.log('========================================');
+    }
+
+    /**
      * Obtém dados únicos para filtros
      */
     getUniqueValues(column) {
@@ -303,7 +521,14 @@ class DataProcessor {
             }
         });
         
-        return Array.from(values).sort();
+        const uniqueArray = Array.from(values).sort();
+        
+        // Log para colunas de data
+        if (column === 'DATA') {
+            console.log(`getUniqueValues('DATA') retornou ${uniqueArray.length} valores`);
+        }
+        
+        return uniqueArray;
     }
 
     /**
