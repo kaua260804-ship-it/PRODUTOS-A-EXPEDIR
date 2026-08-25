@@ -31,7 +31,7 @@
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow-lg);
     width: 95%;
-    max-width: 700px;
+    max-width: 600px;
     max-height: 85vh;
     overflow-y: auto;
     animation: slideIn 0.3s ease;
@@ -45,7 +45,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: var(--spacing-sm) var(--spacing-md);
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
@@ -85,7 +85,7 @@
 }
 
 .modal-body {
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm);
     flex: 1;
     overflow-y: auto;
 }
@@ -93,32 +93,32 @@
 /* Tipo de comparativo - COMPACTO */
 .comparativo-tipo {
     display: flex;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-md);
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
     justify-content: center;
     flex-wrap: wrap;
 }
 
 .comparativo-tipo-btn {
-    padding: 8px 16px;
+    padding: 6px 12px;
     border: 2px solid var(--border-color);
     background-color: var(--bg-secondary);
     color: var(--text-primary);
     border-radius: var(--border-radius);
     cursor: pointer;
     transition: var(--transition);
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     font-weight: 600;
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
     flex: 1;
     justify-content: center;
-    min-width: 150px;
+    min-width: 120px;
 }
 
 .comparativo-tipo-btn i {
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
 }
 
 .comparativo-tipo-btn:hover {
@@ -133,23 +133,19 @@
     box-shadow: var(--box-shadow);
 }
 
-.comparativo-tipo-btn.active i {
-    color: var(--text-light);
-}
-
 /* Selectores do comparativo - COMPACTO */
 .comparativo-selectors {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
     align-items: end;
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
 }
 
 .comparativo-selector {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-xs);
+    gap: 2px;
 }
 
 .comparativo-selector label {
@@ -157,14 +153,15 @@
     font-size: var(--font-size-xs);
     color: var(--text-primary);
     text-align: center;
+    margin: 0;
 }
 
 .comparativo-selector select {
     width: 100%;
-    padding: 8px;
+    padding: 6px;
     border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    font-size: var(--font-size-sm);
+    border-radius: 4px;
+    font-size: var(--font-size-xs);
     background-color: var(--bg-secondary);
     color: var(--text-primary);
     text-align: center;
@@ -175,55 +172,51 @@
 .comparativo-selector select:focus {
     outline: none;
     border-color: var(--secondary-color);
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
 }
 
 /* Botão gerar comparativo */
 #btnGerarComparativo {
     grid-column: 1 / -1;
-    padding: 10px 20px;
-    font-size: var(--font-size-sm);
+    padding: 8px 16px;
+    font-size: var(--font-size-xs);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     background: linear-gradient(135deg, var(--secondary-color), #2980b9);
     color: var(--text-light);
     border: none;
-    border-radius: var(--border-radius);
+    border-radius: 4px;
     cursor: pointer;
     transition: var(--transition);
     box-shadow: var(--box-shadow);
     white-space: nowrap;
     width: 100%;
+    margin-top: 4px;
 }
 
 #btnGerarComparativo:hover {
     box-shadow: var(--box-shadow-lg);
-    transform: translateY(-2px);
+    transform: translateY(-1px);
 }
 
 #btnGerarComparativo:active {
     transform: translateY(0);
-    box-shadow: var(--box-shadow);
-}
-
-#btnGerarComparativo i {
-    font-size: var(--font-size-sm);
 }
 
 /* Filtros do comparativo - COMPACTO */
 .comparativo-filtros {
-    margin-bottom: var(--spacing-md);
-    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+    padding: var(--spacing-xs);
     background-color: var(--bg-primary);
-    border-radius: var(--border-radius);
+    border-radius: 4px;
 }
 
 .comparativo-filtros .filters-grid {
     margin-bottom: 0;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
 }
 
 .comparativo-filtros .filter-group {
@@ -233,23 +226,23 @@
 .comparativo-filtros .filter-label {
     display: block;
     font-weight: 600;
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: 2px;
     color: var(--text-primary);
-    font-size: var(--font-size-xs);
+    font-size: 10px;
     text-align: center;
 }
 
 .comparativo-filtros .filter-label i {
-    margin-right: 4px;
+    margin-right: 2px;
     color: var(--text-secondary);
 }
 
 .comparativo-filtros .filter-select {
     width: 100%;
-    padding: 6px;
+    padding: 4px;
     border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
-    font-size: var(--font-size-xs);
+    border-radius: 4px;
+    font-size: 10px;
     background-color: var(--bg-secondary);
     color: var(--text-primary);
     text-align: center;
@@ -260,33 +253,32 @@
 .comparativo-filtros .filter-select:focus {
     outline: none;
     border-color: var(--secondary-color);
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
-/* Filtros aplicados no comparativo */
+/* Filtros aplicados */
 .filtros-aplicados {
-    margin-top: var(--spacing-xs);
-    font-size: var(--font-size-xs);
+    margin-top: 4px;
+    font-size: 10px;
     color: var(--text-secondary);
     font-weight: 500;
     background-color: rgba(52, 152, 219, 0.1);
-    padding: 4px 8px;
-    border-radius: 4px;
+    padding: 2px 6px;
+    border-radius: 3px;
     display: inline-block;
 }
 
-/* Resultado do comparativo */
+/* Resultado do comparativo - COMPACTO */
 .comparativo-resultado {
     animation: fadeIn 0.5s ease;
-    margin-top: var(--spacing-md);
+    margin-top: var(--spacing-sm);
 }
 
 .comparativo-header {
     text-align: center;
-    margin-bottom: var(--spacing-md);
-    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+    padding: var(--spacing-xs);
     background-color: var(--bg-primary);
-    border-radius: var(--border-radius);
+    border-radius: 4px;
 }
 
 .comparativo-header h3 {
@@ -295,7 +287,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
     margin: 0;
     flex-wrap: wrap;
 }
@@ -305,18 +297,16 @@
 }
 
 .comparativo-item {
-    padding: var(--spacing-sm);
-    margin-bottom: var(--spacing-sm);
-    border-radius: var(--border-radius);
-    border-left: 4px solid var(--border-color);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+    border-radius: 4px;
+    border-left: 3px solid var(--border-color);
     transition: var(--transition);
-    text-align: center;
     background-color: var(--bg-secondary);
 }
 
 .comparativo-item:hover {
     box-shadow: var(--box-shadow);
-    transform: translateX(2px);
 }
 
 .comparativo-item.bom {
@@ -334,13 +324,12 @@
     border-left-color: var(--info-color);
 }
 
+/* Layout inline para o item */
 .comparativo-item-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-xs);
-    flex-wrap: wrap;
     gap: var(--spacing-xs);
+    flex-wrap: wrap;
 }
 
 .comparativo-item-title {
@@ -348,12 +337,13 @@
     align-items: center;
     gap: var(--spacing-xs);
     font-weight: 600;
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     color: var(--text-primary);
+    white-space: nowrap;
 }
 
 .comparativo-item-title i {
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
 }
 
 .comparativo-item-title i.fa-times-circle {
@@ -369,13 +359,13 @@
 }
 
 .comparativo-item-values {
-    display: flex;
+    display: inline-flex;
     align-items: baseline;
     gap: var(--spacing-xs);
 }
 
 .valor-principal {
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-md);
     font-weight: 700;
     color: var(--text-primary);
 }
@@ -388,11 +378,7 @@
 .comparativo-item-detail {
     font-size: var(--font-size-xs);
     color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-xs);
-    flex-wrap: wrap;
+    display: inline;
     line-height: 1.4;
 }
 
@@ -409,24 +395,23 @@
 }
 
 .indicador {
-    font-size: var(--font-size-md);
-    margin-left: var(--spacing-xs);
-    animation: pulse 1s ease;
+    font-size: var(--font-size-sm);
+    margin-left: 2px;
 }
 
 /* Footer do comparativo - COMPACTO */
 .comparativo-footer {
-    margin-top: var(--spacing-md);
-    padding: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+    padding: var(--spacing-xs);
     background-color: var(--bg-primary);
-    border-radius: var(--border-radius);
+    border-radius: 4px;
     text-align: center;
 }
 
 .total-info {
     display: flex;
     justify-content: center;
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
     flex-wrap: wrap;
 }
 
@@ -439,73 +424,7 @@
     color: var(--text-primary);
 }
 
-.comparativo-data {
-    font-weight: 500;
-}
-
-/* Loading overlay */
-.loading-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-}
-
-.loading-content {
-    background-color: var(--bg-secondary);
-    padding: var(--spacing-xl);
-    border-radius: var(--border-radius);
-    text-align: center;
-    box-shadow: var(--box-shadow-lg);
-}
-
-.loading-spinner {
-    display: inline-block;
-    width: 40px;
-    height: 40px;
-    border: 4px solid var(--bg-primary);
-    border-radius: 50%;
-    border-top-color: var(--secondary-color);
-    animation: spin 0.6s linear infinite;
-    margin-bottom: var(--spacing-md);
-}
-
-/* Animação de entrada do modal */
-@keyframes modalIn {
-    from {
-        opacity: 0;
-        transform: translateY(-50px) scale(0.9);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-@keyframes overlayIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-.modal .modal-content {
-    animation: modalIn 0.3s ease-out;
-}
-
-.modal .modal-overlay {
-    animation: overlayIn 0.3s ease-out;
-}
-
-/* Responsive adjustments */
+/* Responsive */
 @media (max-width: 768px) {
     .modal-content {
         width: 100%;
@@ -513,17 +432,8 @@
         margin: 5px;
     }
     
-    .modal-header {
-        padding: var(--spacing-sm);
-    }
-    
-    .modal-body {
-        padding: var(--spacing-sm);
-    }
-    
     .comparativo-selectors {
         grid-template-columns: 1fr;
-        gap: var(--spacing-xs);
     }
     
     .comparativo-tipo {
@@ -532,36 +442,10 @@
     
     .comparativo-tipo-btn {
         width: 100%;
-        justify-content: center;
-        min-width: auto;
     }
     
     .comparativo-filtros .filters-grid {
         grid-template-columns: 1fr;
-        gap: var(--spacing-xs);
-    }
-    
-    .comparativo-item-header {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-    
-    .comparativo-item-values {
-        flex-direction: column;
-        align-items: center;
-        gap: var(--spacing-xs);
-    }
-    
-    .comparativo-header h3 {
-        font-size: var(--font-size-xs);
-        flex-direction: column;
-        gap: var(--spacing-xs);
-    }
-    
-    .total-info {
-        flex-direction: column;
-        gap: var(--spacing-xs);
     }
 }
 
@@ -573,63 +457,8 @@
         border-radius: 0;
     }
     
-    .modal-header {
-        padding: var(--spacing-xs);
+    .comparativo-item-header {
+        flex-direction: column;
+        align-items: flex-start;
     }
-    
-    .modal-title {
-        font-size: var(--font-size-sm);
-    }
-    
-    .modal-body {
-        padding: var(--spacing-xs);
-    }
-    
-    .comparativo-tipo-btn {
-        padding: 6px 10px;
-        font-size: var(--font-size-xs);
-    }
-    
-    .comparativo-item {
-        padding: var(--spacing-xs);
-    }
-    
-    .comparativo-item-title {
-        font-size: var(--font-size-xs);
-    }
-    
-    .valor-principal {
-        font-size: var(--font-size-md);
-    }
-    
-    .comparativo-item-detail {
-        font-size: 10px;
-    }
-    
-    .indicador {
-        font-size: var(--font-size-sm);
-    }
-    
-    .filtros-aplicados {
-        font-size: 10px;
-    }
-}
-
-/* Scrollbar personalizada para o modal */
-.modal-content::-webkit-scrollbar {
-    width: 6px;
-}
-
-.modal-content::-webkit-scrollbar-track {
-    background: var(--bg-primary);
-    border-radius: 3px;
-}
-
-.modal-content::-webkit-scrollbar-thumb {
-    background: var(--text-muted);
-    border-radius: 3px;
-}
-
-.modal-content::-webkit-scrollbar-thumb:hover {
-    background: var(--text-secondary);
 }
