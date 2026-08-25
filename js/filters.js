@@ -11,7 +11,10 @@ class Filters {
             pedido: '',
             codigo: '',
             produto: '',
-            status: ''
+            status: '',
+            categoria: '',
+            grupo: '',
+            subgrupo: ''
         };
         this.filteredData = [];
         this.initializeEventListeners();
@@ -55,6 +58,21 @@ class Filters {
             this.applyFilters();
         });
         
+        document.getElementById('filterCategoria').addEventListener('change', (e) => {
+            this.filters.categoria = e.target.value;
+            this.applyFilters();
+        });
+        
+        document.getElementById('filterGrupo').addEventListener('change', (e) => {
+            this.filters.grupo = e.target.value;
+            this.applyFilters();
+        });
+        
+        document.getElementById('filterSubgrupo').addEventListener('change', (e) => {
+            this.filters.subgrupo = e.target.value;
+            this.applyFilters();
+        });
+        
         document.getElementById('btnClearFilters').addEventListener('click', () => {
             this.clearFilters();
         });
@@ -64,13 +82,25 @@ class Filters {
      * Popula as opções dos filtros dropdown
      */
     populateFilterOptions() {
-        // Datas
+        // Datas (formatadas)
         const datas = this.dataProcessor.getUniqueValues('DATA');
-        this.populateSelect('filterData', datas);
+        this.populateSelect('filterData', datas, true);
         
         // Empresas
         const empresas = this.dataProcessor.getUniqueValues('EMPRESA');
         this.populateSelect('filterEmpresa', empresas);
+        
+        // Categorias
+        const categorias = this.dataProcessor.getUniqueValues('CATEGORIA');
+        this.populateSelect('filterCategoria', categorias);
+        
+        // Grupos
+        const grupos = this.dataProcessor.getUniqueValues('GRUPO');
+        this.populateSelect('filterGrupo', grupos);
+        
+        // Subgrupos
+        const subgrupos = this.dataProcessor.getUniqueValues('SUBGRUPO');
+        this.populateSelect('filterSubgrupo', subgrupos);
         
         console.log('Filtros populados - Datas:', datas.length, 'Empresas:', empresas.length);
     }
@@ -78,7 +108,7 @@ class Filters {
     /**
      * Popula um select com opções
      */
-    populateSelect(selectId, values) {
+    populateSelect(selectId, values, isDate = false) {
         const select = document.getElementById(selectId);
         const currentValue = select.value;
         
@@ -90,11 +120,39 @@ class Filters {
         values.forEach(value => {
             const option = document.createElement('option');
             option.value = value;
-            option.textContent = value;
+            
+            if (isDate) {
+                option.textContent = this.formatDateDisplay(value);
+            } else {
+                option.textContent = value;
+            }
+            
             select.appendChild(option);
         });
         
         select.value = currentValue;
+    }
+
+    /**
+     * Formata data para exibição
+     */
+    formatDateDisplay(dataStr) {
+        // Se for número serial do Excel
+        if (typeof dataStr === 'number' || !isNaN(dataStr)) {
+            const numData = parseFloat(dataStr);
+            if (numData > 40000 && numData < 60000) {
+                const date = new Date(Math.round((numData - 25569) * 86400 * 1000));
+                return date.toLocaleDateString('pt-BR');
+            }
+        }
+        
+        // Tentar diferentes formatos
+        const date = new Date(dataStr);
+        if (!isNaN(date.getTime())) {
+            return date.toLocaleDateString('pt-BR');
+        }
+        
+        return dataStr;
     }
 
     /**
@@ -179,6 +237,21 @@ class Filters {
                 return false;
             }
             
+            // Filtro por categoria
+            if (this.filters.categoria && row['CATEGORIA']?.toString() !== this.filters.categoria) {
+                return false;
+            }
+            
+            // Filtro por grupo
+            if (this.filters.grupo && row['GRUPO']?.toString() !== this.filters.grupo) {
+                return false;
+            }
+            
+            // Filtro por subgrupo
+            if (this.filters.subgrupo && row['SUBGRUPO']?.toString() !== this.filters.subgrupo) {
+                return false;
+            }
+            
             return true;
         });
         
@@ -200,7 +273,10 @@ class Filters {
             pedido: '',
             codigo: '',
             produto: '',
-            status: ''
+            status: '',
+            categoria: '',
+            grupo: '',
+            subgrupo: ''
         };
         
         // Limpar campos
@@ -210,6 +286,9 @@ class Filters {
         document.getElementById('filterCodigo').value = '';
         document.getElementById('filterProduto').value = '';
         document.getElementById('filterStatus').value = '';
+        document.getElementById('filterCategoria').value = '';
+        document.getElementById('filterGrupo').value = '';
+        document.getElementById('filterSubgrupo').value = '';
         
         // Limpar autocomplete
         document.getElementById('autocompletePedido').innerHTML = '';
