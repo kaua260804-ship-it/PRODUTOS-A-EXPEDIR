@@ -17,9 +17,13 @@ class App {
      * Inicializa a aplicação
      */
     async init() {
-        console.log('Inicializando aplicação...');
+        console.log('========================================');
+        console.log('INICIALIZANDO APLICAÇÃO');
+        console.log('========================================');
+        console.log('Data e hora:', new Date().toLocaleString('pt-BR'));
+        console.log('Navegador:', navigator.userAgent);
+        console.log('========================================');
         
-        // Mostrar loading
         this.showLoading(true);
         
         try {
@@ -31,39 +35,50 @@ class App {
             this.dataProcessor = new DataProcessor(sheetsData);
             const processedData = this.dataProcessor.process();
             
-            console.log('Dados processados:', processedData.length, 'registros');
+            console.log('========================================');
+            console.log('DADOS PROCESSADOS:');
+            console.log('========================================');
+            console.log('Total de registros:', processedData.length);
             
-            // Inicializar tabela primeiro
+            // Verificar datas disponíveis
+            const datas = this.dataProcessor.getUniqueValues('DATA');
+            console.log('Datas disponíveis:', datas.length);
+            
+            if (datas.length > 0) {
+                console.log('Primeira data:', datas[0]);
+                console.log('Última data:', datas[datas.length - 1]);
+            }
+            console.log('========================================');
+            
+            // Inicializar componentes
             this.table = new Table(this.dataProcessor);
-            
-            // Inicializar cards
             this.cards = new Cards(this.dataProcessor);
-            
-            // Inicializar filtros (depois da tabela)
             this.filters = new Filters(this.dataProcessor);
-            
-            // Inicializar exportação
             this.export = new Export(this.table);
-            
-            // Inicializar comparativo
             this.comparativo = new Comparativo(this.dataProcessor);
             
             // Definir dados iniciais
             this.table.setData(processedData);
             this.cards.setInitialData(processedData);
-            
-            // Aplicar filtros iniciais
             this.filters.applyFilters();
             
             // Configurar botão de recarregar
             this.setupReloadButton();
             
-            // Tornar a app acessível globalmente para paginação
+            // Tornar a app acessível globalmente
             window.app = this;
             
-            console.log('Aplicação inicializada com sucesso!');
+            console.log('========================================');
+            console.log('APLICAÇÃO INICIALIZADA COM SUCESSO!');
+            console.log('========================================');
         } catch (error) {
-            console.error('Erro na inicialização:', error);
+            console.error('========================================');
+            console.error('ERRO NA INICIALIZAÇÃO:');
+            console.error('========================================');
+            console.error('Mensagem:', error.message);
+            console.error('Stack:', error.stack);
+            console.error('========================================');
+            
             this.showError(error.message);
         } finally {
             this.showLoading(false);
@@ -75,6 +90,10 @@ class App {
      */
     setupReloadButton() {
         document.getElementById('btnReload').addEventListener('click', async () => {
+            console.log('========================================');
+            console.log('BOTÃO RECARREGAR CLICADO');
+            console.log('========================================');
+            
             if (confirm('Deseja recarregar os dados?')) {
                 await this.init();
             }
