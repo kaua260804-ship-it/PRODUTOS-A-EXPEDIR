@@ -6,6 +6,11 @@ class Comparativo {
     constructor(dataProcessor) {
         this.dataProcessor = dataProcessor;
         this.tipoComparativo = 'dia'; // 'dia' ou 'mes'
+        this.filtrosComparativo = {
+            categoria: '',
+            grupo: '',
+            subgrupo: ''
+        };
         this.initializeEventListeners();
     }
 
@@ -30,13 +35,35 @@ class Comparativo {
         });
         
         // Event listeners para os botões de tipo
-        document.querySelectorAll('.comparativo-tipo-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                this.tipoComparativo = btn.dataset.tipo;
-                document.querySelectorAll('.comparativo-tipo-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                this.atualizarSelectores();
-            });
+        document.getElementById('btnTipoDia').addEventListener('click', () => {
+            this.tipoComparativo = 'dia';
+            document.getElementById('btnTipoDia').classList.add('active');
+            document.getElementById('btnTipoMes').classList.remove('active');
+            this.atualizarLabels();
+            this.atualizarSelectores();
+        });
+        
+        document.getElementById('btnTipoMes').addEventListener('click', () => {
+            this.tipoComparativo = 'mes';
+            document.getElementById('btnTipoMes').classList.add('active');
+            document.getElementById('btnTipoDia').classList.remove('active');
+            this.atualizarLabels();
+            this.atualizarSelectores();
+        });
+        
+        // Event listeners para os filtros do comparativo
+        document.getElementById('comparativoCategoria').addEventListener('change', (e) => {
+            this.filtrosComparativo.categoria = e.target.value;
+            this.atualizarFiltrosDependentes();
+        });
+        
+        document.getElementById('comparativoGrupo').addEventListener('change', (e) => {
+            this.filtrosComparativo.grupo = e.target.value;
+            this.atualizarFiltrosDependentes();
+        });
+        
+        document.getElementById('comparativoSubgrupo').addEventListener('change', (e) => {
+            this.filtrosComparativo.subgrupo = e.target.value;
         });
     }
 
@@ -46,6 +73,16 @@ class Comparativo {
     openModal() {
         const modal = document.getElementById('comparativoModal');
         modal.style.display = 'flex';
+        
+        // Resetar filtros
+        this.filtrosComparativo = {
+            categoria: '',
+            grupo: '',
+            subgrupo: ''
+        };
+        
+        // Popular os filtros
+        this.popularFiltrosComparativo();
         
         // Popular as datas disponíveis
         this.atualizarSelectores();
@@ -64,6 +101,22 @@ class Comparativo {
     }
 
     /**
+     * Atualiza os labels dos selectores
+     */
+    atualizarLabels() {
+        const labelBase = document.getElementById('labelDataBase');
+        const labelComparacao = document.getElementById('labelDataComparacao');
+        
+        if (this.tipoComparativo === 'dia') {
+            labelBase.textContent = 'Data Base:';
+            labelComparacao.textContent = 'Data Comparação:';
+        } else {
+            labelBase.textContent = 'Mês Base:';
+            labelComparacao.textContent = 'Mês Comparação:';
+        }
+    }
+
+    /**
      * Atualiza os selectores baseado no tipo
      */
     atualizarSelectores() {
@@ -72,6 +125,106 @@ class Comparativo {
         } else {
             this.popularMeses();
         }
+    }
+
+    /**
+     * Popula os filtros de categoria, grupo e subgrupo
+     */
+    popularFiltrosComparativo() {
+        // Categorias
+        const categorias = this.dataProcessor.getUniqueValues('CATEGORIA');
+        this.popularSelect('comparativoCategoria', categorias, 'Todas');
+        
+        // Grupos
+        const grupos = this.dataProcessor.getUniqueValues('GRUPO');
+        this.popularSelect('comparativoGrupo', grupos, 'Todos');
+        
+        // Subgrupos
+        const subgrupos = this.dataProcessor.getUniqueValues('SUBGRUPO');
+        this.popularSelect('comparativoSubgrupo', subgrupos, 'Todos');
+        
+        console.log('Filtros do comparativo populados:', {
+            categorias: categorias.length,
+            grupos: grupos.length,
+            subgrupos: subgrupos.length
+        });
+    }
+
+    /**
+     * Atualiza filtros dependentes (grupo e subgrupo baseado na categoria)
+     */
+    atualizarFiltrosDependentes() {
+        const categoriaSelecionada = this.filtrosComparativo.categoria;
+        const grupoSelecionado = this.filtrosComparativo.grupo;
+        
+        // Filtrar dados pela categoria selecionada
+        let dadosFiltrados = this.dataProcessor.processedData;
+        
+        if (categoriaSelecionada) {
+            dadosFiltrados = dadosFiltrados.filter(row => 
+                row['CATEGORIA']?.toString() === categoriaSelecionada
+            );
+        }
+        
+        // Atualizar grupos baseado na categoria
+        const grupos = new Set();
+        dadosFiltrados.forEach(row => {
+            if (row['GRUPO']) {
+                grupos.add(row['GRUPO'].toString());
+            }
+        });
+        
+        const grupoSelect = document.getElementById('comparativoGrupo');
+        const grupoAtual = grupoSelect.value;
+        grupoSelect.innerHTML = '<option value="">Todos</option>';
+        Array.from(grupos).sort().forEach(grupo => {
+            const option = document.createElement('option');
+            option.value = grupo;
+            option.textContent = grupo;
+            grupoSelect.appendChild(option);
+        });
+        grupoSelect.value = grupoAtual || '';
+        
+        // Filtrar por grupo se selecionado
+        if (grupoSelecionado && grupoSelect.value === grupoSelecionado) {
+            dadosFiltrados = dadosFiltrados.filter(row => 
+                row['GRUPO']?.toString() === grupoSelecionado
+            );
+        }
+        
+        // Atualizar subgrupos baseado na categoria e grupo
+        const subgrupos = new Set();
+        dadosFiltrados.forEach(row => {
+            if (row['SUBGRUPO']) {
+                subgrupos.add(row['SUBGRUPO'].toString());
+            }
+        });
+        
+        const subgrupoSelect = document.getElementById('comparativoSubgrupo');
+        const subgrupoAtual = subgrupoSelect.value;
+        subgrupoSelect.innerHTML = '<option value="">Todos</option>';
+        Array.from(subgrupos).sort().forEach(subgrupo => {
+            const option = document.createElement('option');
+            option.value = subgrupo;
+            option.textContent = subgrupo;
+            subgrupoSelect.appendChild(option);
+        });
+        subgrupoSelect.value = subgrupoAtual || '';
+    }
+
+    /**
+     * Popula um select com opções
+     */
+    popularSelect(selectId, values, placeholder) {
+        const select = document.getElementById(selectId);
+        select.innerHTML = `<option value="">${placeholder}</option>`;
+        
+        values.forEach(value => {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = value;
+            select.appendChild(option);
+        });
     }
 
     /**
@@ -192,6 +345,33 @@ class Comparativo {
     }
 
     /**
+     * Aplica os filtros do comparativo aos dados
+     */
+    aplicarFiltrosComparativo(dados) {
+        return dados.filter(row => {
+            // Filtro por categoria
+            if (this.filtrosComparativo.categoria && 
+                row['CATEGORIA']?.toString() !== this.filtrosComparativo.categoria) {
+                return false;
+            }
+            
+            // Filtro por grupo
+            if (this.filtrosComparativo.grupo && 
+                row['GRUPO']?.toString() !== this.filtrosComparativo.grupo) {
+                return false;
+            }
+            
+            // Filtro por subgrupo
+            if (this.filtrosComparativo.subgrupo && 
+                row['SUBGRUPO']?.toString() !== this.filtrosComparativo.subgrupo) {
+                return false;
+            }
+            
+            return true;
+        });
+    }
+
+    /**
      * Gera o comparativo
      */
     gerarComparativo() {
@@ -226,13 +406,17 @@ class Comparativo {
             });
         }
         
+        // Aplicar filtros de categoria, grupo e subgrupo
+        dadosBase = this.aplicarFiltrosComparativo(dadosBase);
+        dadosComparacao = this.aplicarFiltrosComparativo(dadosComparacao);
+        
         if (dadosBase.length === 0) {
-            alert(`Não há dados para o ${this.tipoComparativo === 'dia' ? 'dia' : 'mês'} base selecionado`);
+            alert(`Não há dados para o ${this.tipoComparativo === 'dia' ? 'dia' : 'mês'} base selecionado com os filtros aplicados`);
             return;
         }
         
         if (dadosComparacao.length === 0) {
-            alert(`Não há dados para o ${this.tipoComparativo === 'dia' ? 'dia' : 'mês'} de comparação selecionado`);
+            alert(`Não há dados para o ${this.tipoComparativo === 'dia' ? 'dia' : 'mês'} de comparação selecionado com os filtros aplicados`);
             return;
         }
         
@@ -285,12 +469,23 @@ class Comparativo {
         const indicadorAbertos = this.determinarIndicador(diffAbertos, false);
         const indicadorAtendidos = this.determinarIndicador(diffAtendidos, true);
         
+        // Construir texto dos filtros aplicados
+        const filtrosAplicados = [];
+        if (this.filtrosComparativo.categoria) filtrosAplicados.push(`Categoria: ${this.filtrosComparativo.categoria}`);
+        if (this.filtrosComparativo.grupo) filtrosAplicados.push(`Grupo: ${this.filtrosComparativo.grupo}`);
+        if (this.filtrosComparativo.subgrupo) filtrosAplicados.push(`Subgrupo: ${this.filtrosComparativo.subgrupo}`);
+        
+        const filtrosTexto = filtrosAplicados.length > 0 
+            ? `<div class="filtros-aplicados">Filtros: ${filtrosAplicados.join(' | ')}</div>`
+            : '';
+        
         container.innerHTML = `
             <div class="comparativo-header">
                 <h3>
                     <i class="fas fa-calendar-check"></i>
                     Comparativo: ${periodoBase} vs ${periodoComparacao}
                 </h3>
+                ${filtrosTexto}
             </div>
             
             <div class="comparativo-item ${indicadorCortados.tipo}">
@@ -365,6 +560,9 @@ class Comparativo {
         if (modalContent) {
             modalContent.style.margin = 'auto';
         }
+        
+        // Scroll para o resultado
+        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     /**
