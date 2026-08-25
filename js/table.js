@@ -7,7 +7,7 @@ class Table {
         this.dataProcessor = dataProcessor;
         this.currentData = [];
         this.currentPage = 1;
-        this.recordsPerPage = 50; // Alterado para 50 por padrão
+        this.recordsPerPage = 50;
         this.totalPages = 1;
         this.sortColumn = null;
         this.sortDirection = 'asc';
@@ -46,7 +46,6 @@ class Table {
             }
         });
         
-        // Corrigido: Aplicar o valor selecionado imediatamente
         document.getElementById('recordsPerPage').addEventListener('change', (e) => {
             this.recordsPerPage = parseInt(e.target.value) || 50;
             this.currentPage = 1;
@@ -74,7 +73,6 @@ class Table {
         this.currentData = data || [];
         this.currentPage = 1;
         
-        // Garantir que o valor do seletor seja aplicado
         const selectElement = document.getElementById('recordsPerPage');
         if (selectElement) {
             this.recordsPerPage = parseInt(selectElement.value) || 50;
@@ -172,7 +170,7 @@ class Table {
     }
 
     /**
-     * Obtém as colunas da tabela - STATUS como terceira coluna
+     * Obtém as colunas da tabela - SEM colunas duplicadas
      */
     getTableColumns() {
         return [
@@ -187,16 +185,12 @@ class Table {
             { key: 'TOTAL QND UND VENDA', label: 'Total Qnd Und Venda' },
             { key: 'QTD EXPEDIR', label: 'Qtd Expedir' },
             { key: 'ESTOQUE DISPONIVEL', label: 'Estoque Disponível' },
-            { key: 'CATEGORIA', label: 'Categoria' },
-            { key: 'GRUPO', label: 'Grupo' },
-            { key: 'SUBGRUPO', label: 'Subgrupo' },
+            { key: 'CATEGORIA', label: 'Categoria' }, // Agora vem do NIVEL 1
+            { key: 'GRUPO', label: 'Grupo' }, // Agora vem do NIVEL 2
+            { key: 'SUBGRUPO', label: 'Subgrupo' }, // Agora vem do NIVEL 3
             { key: 'DATA', label: 'Data' },
             { key: 'EST DISPONIVEL', label: 'Est Disponível' },
             { key: 'CUSTO', label: 'Custo' },
-            { key: 'NIVEL_1', label: 'Nível 1' },
-            { key: 'NIVEL_2', label: 'Nível 2' },
-            { key: 'NIVEL_3', label: 'Nível 3' },
-            { key: 'NIVEL_4', label: 'Nível 4' },
             { key: 'QTD_DISPONIVEL_CD', label: 'Qtd Disponível CD' },
             { key: 'PRECO_VDA_UNITARIO', label: 'Preço Vda Unitário' }
         ];
