@@ -36,9 +36,9 @@ class DataProcessor {
             TOTAL_QND_UND_VENDA: 'TOTAL QND UND VENDA',
             QTD_EXPEDIR: 'QTD EXPEDIR',
             ESTOQUE_DISPONIVEL: 'ESTOQUE DISPONIVEL',
-            CATEGORIA: 'CATEGORIA',
-            GRUPO: 'GRUPO',
-            SUBGRUPO: 'SUBGRUPO',
+            CATEGORIA: 'CATEGORIA', // Será removida depois
+            GRUPO: 'GRUPO', // Será removida depois
+            SUBGRUPO: 'SUBGRUPO', // Será removida depois
             DATA: 'DATA',
             EST_DISPONIVEL: 'EST DISPONIVEL',
             CUSTO: 'CUSTO'
@@ -114,13 +114,15 @@ class DataProcessor {
             const nivel2 = row['NIVEL 2'] || row['NIVEL2'] || row['NÍVEL 2'];
             const nivel3 = row['NIVEL 3'] || row['NIVEL3'] || row['NÍVEL 3'];
             const nivel4 = row['NIVEL 4'] || row['NIVEL4'] || row['NÍVEL 4'];
+            const nivel5 = row['NIVEL 5'] || row['NIVEL5'] || row['NÍVEL 5'];
             
             if (seqProduto) {
                 this.bsCadMap.set(seqProduto.toString(), {
                     nivel1: nivel1 || '',
                     nivel2: nivel2 || '',
                     nivel3: nivel3 || '',
-                    nivel4: nivel4 || ''
+                    nivel4: nivel4 || '',
+                    nivel5: nivel5 || ''
                 });
             }
         });
@@ -189,6 +191,7 @@ class DataProcessor {
             const estcdData = this.estcdMap.get(codigoStr) || {};
             
             // Criar objeto processado com todos os campos
+            // Usar NIVEL 1, 2, 3 como CATEGORIA, GRUPO, SUBGRUPO
             return {
                 // Campos originais
                 'NRO DO PEDIDO': nroPedido,
@@ -201,9 +204,6 @@ class DataProcessor {
                 'TOTAL QND UND VENDA': row[this.columnMapping.TOTAL_QND_UND_VENDA],
                 'QTD EXPEDIR': row[this.columnMapping.QTD_EXPEDIR],
                 'ESTOQUE DISPONIVEL': row[this.columnMapping.ESTOQUE_DISPONIVEL],
-                'CATEGORIA': row[this.columnMapping.CATEGORIA],
-                'GRUPO': row[this.columnMapping.GRUPO],
-                'SUBGRUPO': row[this.columnMapping.SUBGRUPO],
                 'DATA': row[this.columnMapping.DATA],
                 'EST DISPONIVEL': row[this.columnMapping.EST_DISPONIVEL],
                 'CUSTO': row[this.columnMapping.CUSTO],
@@ -211,10 +211,15 @@ class DataProcessor {
                 // Campos calculados
                 'CAD': cad,
                 'STATUS': status,
-                'NIVEL_1': bsCadData.nivel1 || '',
-                'NIVEL_2': bsCadData.nivel2 || '',
-                'NIVEL_3': bsCadData.nivel3 || '',
+                
+                // Usar NIVEL como CATEGORIA, GRUPO, SUBGRUPO
+                'CATEGORIA': bsCadData.nivel1 || '',
+                'GRUPO': bsCadData.nivel2 || '',
+                'SUBGRUPO': bsCadData.nivel3 || '',
+                
+                // Campos adicionais
                 'NIVEL_4': bsCadData.nivel4 || '',
+                'NIVEL_5': bsCadData.nivel5 || '',
                 'QTD_DISPONIVEL_CD': estcdData.qtdDisponivel || 0,
                 'PRECO_VDA_UNITARIO': estcdData.precoVdaUnitario || 0
             };
