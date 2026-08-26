@@ -1,0 +1,259 @@
+# ==========================================
+# ARQUIVOS DE DADOS (NÃO SUBIR PARA O GIT)
+# ==========================================
+
+# Dados sensíveis - NUNCA subir para o repositório
+dados/
+*.xlsx
+*.xls
+*.csv
+*.xlsm
+*.xlsb
+*.xltx
+*.xltm
+
+# ==========================================
+# ARQUIVOS DO SISTEMA OPERACIONAL
+# ==========================================
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.swp
+*.swo
+*~
+*.tmp
+*.temp
+*.log
+
+# Linux
+*~
+.directory
+.Trash-*
+*.pid
+*.lock
+*.socket
+
+# ==========================================
+# ARQUIVOS DE IDE/EDITORES
+# ==========================================
+
+# VS Code
+.vscode/
+*.code-workspace
+.code/
+.history/
+*.sublime-workspace
+*.sublime-project
+
+# IntelliJ IDEA / WebStorm / PhpStorm
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+.idea_modules/
+*.class
+*.jar
+*.war
+*.ear
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+build/
+
+# NetBeans
+nbproject/
+nbdist/
+dist/
+build/
+
+# ==========================================
+# ARQUIVOS DE DEPENDÊNCIAS
+# ==========================================
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+.pnpm-debug.log
+
+# ==========================================
+# ARQUIVOS DE BUILD/BACKUP
+# ==========================================
+
+# Build
+dist/
+build/
+out/
+*.min.js
+*.min.css
+*.bundle.js
+*.bundle.css
+
+# Backup
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+*.patch
+*.diff
+
+# ==========================================
+# ARQUIVOS DE AMBIENTE/CONFIGURAÇÃO
+# ==========================================
+
+# Env
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.test
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# ==========================================
+# ARQUIVOS DE LOGS
+# ==========================================
+
+*.log
+logs/
+log/
+*.pid
+*.seed
+*.pid.lock
+
+# ==========================================
+# ARQUIVOS DE TEMPORÁRIOS
+# ==========================================
+
+*.tmp
+*.temp
+*.cache
+*.swp
+*.swo
+*~
+tmp/
+temp/
+.cache/
+
+# ==========================================
+# ARQUIVOS DE TESTES
+# ==========================================
+
+coverage/
+.nyc_output/
+*.test.js
+*.spec.js
+*.test.ts
+*.spec.ts
+__tests__/
+__mocks__/
+*.snap
+
+# ==========================================
+# ARQUIVOS DO GIT
+# ==========================================
+
+.git/
+.gitignore
+.gitattributes
+.gitmodules
+.gitkeep
+*.patch
+*.diff
+
+# ==========================================
+# ARQUIVOS DE DOCUMENTAÇÃO (OPCIONAL)
+# ==========================================
+
+# Se quiser manter a documentação, remova essas linhas
+# docs/
+# *.md (exceto README.md)
+
+# ==========================================
+# OUTROS ARQUIVOS
+# ==========================================
+
+# Arquivos compactados
+*.zip
+*.rar
+*.7z
+*.gz
+*.tar
+*.bz2
+*.xz
+
+# Arquivos de imagem pesados (opcional)
+# *.png
+# *.jpg
+# *.jpeg
+# *.gif
+# *.bmp
+# *.svg
+
+# Arquivos de áudio/vídeo (opcional)
+*.mp3
+*.mp4
+*.avi
+*.mkv
+*.wav
+*.flac
+
+# ==========================================
+# ARQUIVOS ESPECÍFICOS DO PROJETO
+# ==========================================
+
+# Arquivo Excel de dados (já incluído acima)
+# dados/PEDIDOS A EXPEDIR.xlsx
+
+# Arquivos temporários do Excel
+~$*.xlsx
+~$*.xls
+*.xlk
+*.xlw
+*.xla
+*.xlam
+*.xll
+*.xlt
+*.xltx
+*.xltm
+
+# ==========================================
+# ARQUIVOS DO GITHUB PAGES (OPCIONAL)
+# ==========================================
+
+# Se usar GitHub Pages, esses arquivos não precisam ser ignorados
+# .nojekyll
+# CNAME
+# 404.html
