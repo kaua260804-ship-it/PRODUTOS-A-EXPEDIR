@@ -159,7 +159,7 @@ class Table {
             { key: 'SALDO', label: 'Saldo' },
             { key: 'QTD DISTRIBUIÇÃO', label: 'Qtd Distribuição' },
             { key: 'TOTAL QND UND VENDA', label: 'Total Qnd Und Venda' },
-            { key: 'QTD EXPEDIR', label: 'Qtd Expedir' },
+            { key: 'QTD EXPEDIR', label: 'Qtd Pedida' },
             { key: 'ESTOQUE DISPONIVEL', label: 'Estoque Disponível' },
             { key: 'CATEGORIA', label: 'Categoria' },
             { key: 'GRUPO', label: 'Grupo' },
