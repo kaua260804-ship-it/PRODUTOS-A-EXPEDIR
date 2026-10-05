@@ -322,11 +322,15 @@
                     </button>
                     <button class="comparativo-tipo-btn" data-tipo="mes" id="btnTipoMes">
                         <i class="fas fa-calendar-alt"></i>
-                        Comparar Meses (Acumulado)
+                        Comparar Meses
+                    </button>
+                    <button class="comparativo-tipo-btn" data-tipo="periodo" id="btnTipoPeriodo">
+                        <i class="fas fa-calendar-week"></i>
+                        Por Período (Dia a Dia)
                     </button>
                 </div>
                 
-                <!-- Selectores -->
+                <!-- Selectores (comparar dia/mês) -->
                 <div class="comparativo-selectors">
                     <div class="comparativo-selector">
                         <label for="dataBase" id="labelDataBase">Data Base:</label>
@@ -343,6 +347,26 @@
                     <button class="btn btn-primary" id="btnGerarComparativo">
                         <i class="fas fa-calculator"></i>
                         Gerar Comparativo
+                    </button>
+                </div>
+                
+                <!-- Selectores de Período (novo tipo) -->
+                <div class="comparativo-selectors-periodo" id="comparativoSelectorsPeriodo" style="display: none;">
+                    <div class="comparativo-selector">
+                        <label for="dataInicioPeriodo">Data Início:</label>
+                        <select id="dataInicioPeriodo" class="filter-select">
+                            <option value="">Selecione a data inicial</option>
+                        </select>
+                    </div>
+                    <div class="comparativo-selector">
+                        <label for="dataFimPeriodo">Data Fim:</label>
+                        <select id="dataFimPeriodo" class="filter-select">
+                            <option value="">Selecione a data final</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" id="btnGerarPeriodo">
+                        <i class="fas fa-calculator"></i>
+                        Gerar Resumo do Período
                     </button>
                 </div>
                 
