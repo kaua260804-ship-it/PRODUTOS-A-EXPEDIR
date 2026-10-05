@@ -334,8 +334,12 @@
                         <i class="fas fa-calendar-alt"></i>
                         Comparar Meses
                     </button>
-                    <button class="comparativo-tipo-btn" data-tipo="periodo" id="btnTipoPeriodo">
+                    <button class="comparativo-tipo-btn" data-tipo="semana" id="btnTipoSemana">
                         <i class="fas fa-calendar-week"></i>
+                        Comparar Semanas
+                    </button>
+                    <button class="comparativo-tipo-btn" data-tipo="periodo" id="btnTipoPeriodo">
+                        <i class="fas fa-calendar-alt"></i>
                         Por Período (Dia a Dia)
                     </button>
                 </div>
@@ -360,7 +364,7 @@
                     </button>
                 </div>
                 
-                <!-- Selectores de Período (novo tipo) -->
+                <!-- Selectores de Período (tipo período) -->
                 <div class="comparativo-selectors-periodo" id="comparativoSelectorsPeriodo" style="display: none;">
                     <div class="comparativo-selector">
                         <label for="dataInicioPeriodo">Data Início:</label>
@@ -377,6 +381,28 @@
                     <button class="btn btn-primary" id="btnGerarPeriodo">
                         <i class="fas fa-calculator"></i>
                         Gerar Resumo do Período
+                    </button>
+                </div>
+                
+                <!-- Selectores de Semana (tipo semana) -->
+                <div class="comparativo-selectors-semana" id="comparativoSelectorsSemana" style="display: none;">
+                    <div class="comparativo-selector">
+                        <label for="semana1Inicio">Início da Semana 1:</label>
+                        <select id="semana1Inicio" class="filter-select">
+                            <option value="">Selecione o início da semana 1</option>
+                        </select>
+                        <small class="comparativo-hint">O sistema pega 7 dias a partir desta data</small>
+                    </div>
+                    <div class="comparativo-selector">
+                        <label for="semana2Inicio">Início da Semana 2:</label>
+                        <select id="semana2Inicio" class="filter-select">
+                            <option value="">Selecione o início da semana 2</option>
+                        </select>
+                        <small class="comparativo-hint">O sistema pega 7 dias a partir desta data</small>
+                    </div>
+                    <button class="btn btn-primary" id="btnGerarSemana">
+                        <i class="fas fa-calculator"></i>
+                        Gerar Comparativo de Semanas
                     </button>
                 </div>
                 
