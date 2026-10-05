@@ -27,12 +27,13 @@ class App {
         this.showLoading(true);
         
         try {
-            // Carregar dados
+            // Carregar dados principais
             this.dataLoader = new DataLoader();
             const sheetsData = await this.dataLoader.loadExcelFile();
+            const tiposData = this.dataLoader.getTiposData();
             
-            // Processar dados
-            this.dataProcessor = new DataProcessor(sheetsData);
+            // Processar dados (passando os tipos para o processador)
+            this.dataProcessor = new DataProcessor(sheetsData, tiposData);
             const processedData = this.dataProcessor.process();
             
             console.log('========================================');
@@ -48,6 +49,14 @@ class App {
                 console.log('Primeira data:', datas[0]);
                 console.log('Última data:', datas[datas.length - 1]);
             }
+            
+            // Verificar tipos disponíveis
+            const tipos = this.dataProcessor.getUniqueTipos();
+            console.log('Tipos disponíveis:', tipos.length);
+            if (tipos.length > 0) {
+                console.log('Tipos:', tipos);
+            }
+            
             console.log('========================================');
             
             // Inicializar componentes
