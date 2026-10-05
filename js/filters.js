@@ -14,7 +14,8 @@ class Filters {
             status: '',
             categoria: '',
             grupo: '',
-            subgrupo: ''
+            subgrupo: '',
+            tipo: ''
         };
         this.filteredData = [];
         this.initializeEventListeners();
@@ -70,6 +71,15 @@ class Filters {
             this.applyFilters();
         });
         
+        // Novo filtro: TIPO
+        const filterTipoEl = document.getElementById('filterTipo');
+        if (filterTipoEl) {
+            filterTipoEl.addEventListener('change', (e) => {
+                this.filters.tipo = e.target.value;
+                this.applyFilters();
+            });
+        }
+        
         document.getElementById('btnClearFilters').addEventListener('click', () => {
             this.clearFilters();
         });
@@ -90,10 +100,16 @@ class Filters {
         
         const subgrupos = this.dataProcessor.getUniqueValues('SUBGRUPO');
         this.populateSelect('filterSubgrupo', subgrupos);
+        
+        // Novo: Tipos
+        const tipos = this.dataProcessor.getUniqueTipos();
+        this.populateSelect('filterTipo', tipos);
     }
 
     populateSelect(selectId, values, isDate = false) {
         const select = document.getElementById(selectId);
+        if (!select) return;
+        
         const currentValue = select.value;
         
         const firstOption = select.options[0];
@@ -119,6 +135,8 @@ class Filters {
     showAutocomplete(field, value) {
         const containerId = `autocomplete${field.charAt(0).toUpperCase() + field.slice(1)}`;
         const container = document.getElementById(containerId);
+        
+        if (!container) return;
         
         if (!value || value.length < 1) {
             container.innerHTML = '';
@@ -198,6 +216,11 @@ class Filters {
                 return false;
             }
             
+            // Novo filtro por TIPO
+            if (this.filters.tipo && row['TIPO']?.toString().trim() !== this.filters.tipo.trim()) {
+                return false;
+            }
+            
             return true;
         });
         
@@ -216,7 +239,8 @@ class Filters {
             status: '',
             categoria: '',
             grupo: '',
-            subgrupo: ''
+            subgrupo: '',
+            tipo: ''
         };
         
         document.getElementById('filterData').value = '';
@@ -228,6 +252,9 @@ class Filters {
         document.getElementById('filterCategoria').value = '';
         document.getElementById('filterGrupo').value = '';
         document.getElementById('filterSubgrupo').value = '';
+        
+        const filterTipo = document.getElementById('filterTipo');
+        if (filterTipo) filterTipo.value = '';
         
         document.getElementById('autocompletePedido').innerHTML = '';
         document.getElementById('autocompleteCodigo').innerHTML = '';
