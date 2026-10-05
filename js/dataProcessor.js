@@ -3,39 +3,54 @@
  */
 
 class DataProcessor {
-    constructor(sheetsData) {
+    constructor(sheetsData, tiposData = []) {
         this.sheetsData = sheetsData;
+        this.tiposData = tiposData || [];
         this.processedData = [];
         this.corteKeys = new Set();
         this.abertoKeys = new Set();
         this.bsCadMap = new Map();
         this.estcdMap = new Map();
+        this.tiposMap = new Map(); // Mapa: codigo -> tipo
         
-        this.columnMapping = this.detectColumnMapping();
+        this.buildTiposMap();
     }
 
     /**
-     * Detecta o mapeamento real das colunas
+     * Constrói o mapa de TIPOS (SeqProduto -> tipo)
      */
-    detectColumnMapping() {
-        const geralData = this.sheetsData[CONFIG.SHEETS.GERAL] || [];
-        const firstRow = geralData[0] || {};
+    buildTiposMap() {
+        if (!this.tiposData || this.tiposData.length === 0) {
+            console.log('Nenhum dado de TIPOS disponível');
+            return;
+        }
         
-        return {
-            NRO_PEDIDO: 'NRO DO PEDIDO',
-            CODIGO: 'CODIGO',
-            PRODUTO: 'PRODUTO',
-            EMBALAGEM: 'EMBALAGEM',
-            EMPRESA: 'EMPRESA',
-            SALDO: 'SALDO',
-            QTD_DISTRIBUICAO: 'QTD DISTRIBUIÇÃO',
-            TOTAL_QND_UND_VENDA: 'TOTAL QND UND VENDA',
-            QTD_EXPEDIR: 'QTD EXPEDIR',
-            ESTOQUE_DISPONIVEL: 'ESTOQUE DISPONIVEL',
-            DATA: 'DATA',
-            EST_DISPONIVEL: 'EST DISPONIVEL',
-            CUSTO: 'CUSTO'
-        };
+        console.log('========================================');
+        console.log('CONSTRUINDO MAPA DE TIPOS');
+        console.log('========================================');
+        
+        this.tiposData.forEach((row, index) => {
+            // Tentar diferentes nomes de coluna
+            const seqProduto = row['SeqProduto'] || row['SEQ PRODUTO'] || row['SEQPRODUTO'] || row['Codigo'] || row['CODIGO'];
+            const tipo = row['tipo'] || row['TIPO'] || row['Tipo'];
+            
+            if (seqProduto !== undefined && seqProduto !== null && seqProduto !== '') {
+                const key = seqProduto.toString().trim();
+                this.tiposMap.set(key, tipo || '');
+            }
+        });
+        
+        console.log('Total de tipos mapeados:', this.tiposMap.size);
+        
+        // Mostrar alguns exemplos
+        let count = 0;
+        this.tiposMap.forEach((tipo, codigo) => {
+            if (count < 5) {
+                console.log(`  ${codigo} -> ${tipo}`);
+                count++;
+            }
+        });
+        console.log('========================================');
     }
 
     /**
@@ -51,9 +66,6 @@ class DataProcessor {
         return this.processedData;
     }
 
-    /**
-     * Constrói o conjunto de chaves CAD da aba CORTE
-     */
     buildCorteKeys() {
         const corteData = this.sheetsData[CONFIG.SHEETS.CORTE] || [];
         
@@ -69,9 +81,6 @@ class DataProcessor {
         });
     }
 
-    /**
-     * Constrói o conjunto de chaves CAD da aba ABERTO
-     */
     buildAbertoKeys() {
         const abertoData = this.sheetsData[CONFIG.SHEETS.ABERTO] || [];
         
@@ -87,9 +96,6 @@ class DataProcessor {
         });
     }
 
-    /**
-     * Constrói o mapa de dados da aba BS CAD
-     */
     buildBsCadMap() {
         const bsCadData = this.sheetsData[CONFIG.SHEETS.BS_CAD] || [];
         
@@ -113,9 +119,6 @@ class DataProcessor {
         });
     }
 
-    /**
-     * Constrói o mapa de dados da aba ESTCD
-     */
     buildEstcdMap() {
         const estcdData = this.sheetsData[CONFIG.SHEETS.ESTCD] || [];
         
@@ -156,6 +159,7 @@ class DataProcessor {
             const codigoStr = codigo?.toString();
             const bsCadData = this.bsCadMap.get(codigoStr) || {};
             const estcdData = this.estcdMap.get(codigoStr) || {};
+            const tipo = this.tiposMap.get(codigoStr) || '';
             
             return {
                 'NRO DO PEDIDO': nroPedido,
@@ -179,28 +183,35 @@ class DataProcessor {
                 'NIVEL_4': bsCadData.nivel4 || '',
                 'NIVEL_5': bsCadData.nivel5 || '',
                 'QTD_DISPONIVEL_CD': estcdData.qtdDisponivel || 0,
-                'PRECO_VDA_UNITARIO': estcdData.precoVdaUnitario || 0
+                'PRECO_VDA_UNITARIO': estcdData.precoVdaUnitario || 0,
+                'TIPO': tipo
             };
         });
     }
 
-    /**
-     * Cria a chave CAD
-     */
     createCADKey(nroPedido, codigo, empresa) {
         if (!nroPedido || !codigo || !empresa) return null;
         return `${nroPedido.toString().trim()}-${codigo.toString().trim()}-${empresa.toString().trim()}`;
     }
 
     /**
+     * Retorna os tipos únicos disponíveis para filtro
+     */
+    getUniqueTipos() {
+        const tipos = new Set();
+        
+        this.processedData.forEach(row => {
+            const tipo = row['TIPO'];
+            if (tipo && tipo.toString().trim() !== '') {
+                tipos.add(tipo.toString().trim());
+            }
+        });
+        
+        return Array.from(tipos).sort();
+    }
+
+    /**
      * Converte data serial do Excel para objeto Date
-     * CORREÇÃO: Ajuste para o fuso horário e diferença de 1 dia
-     * 
-     * Explicação: 
-     * - Excel serial 46258 = 24/08/2026
-     * - JavaScript new Date() usa UTC
-     * - Ajuste: (serial - 25569 + 1) * 86400000
-     * - O +1 compensa o bug do Excel que considera 1900 como ano bissexto
      */
     excelDateToDate(serial) {
         if (!serial && serial !== 0) return null;
@@ -208,84 +219,44 @@ class DataProcessor {
         const numSerial = parseFloat(serial);
         if (isNaN(numSerial)) return null;
         
-        // Se já for uma data válida, retorna
         if (numSerial > 60000) {
             const date = new Date(numSerial);
-            if (!isNaN(date.getTime())) {
-                return date;
-            }
+            if (!isNaN(date.getTime())) return date;
         }
         
-        // Excel serial: dias desde 01/01/1900
-        // JavaScript: milissegundos desde 01/01/1970
-        // Excel considera 01/01/1900 = 1, JavaScript considera 01/01/1970 = 0
-        // Diferença: 25569 dias entre 01/01/1900 e 01/01/1970
-        // Porém, Excel tem um bug: considera 1900 como bissexto, então há um dia extra
-        // Então: (serial - 25569 + 1) * 86400000
-        
-        // Apenas processa números seriais do Excel (geralmente entre 40000 e 60000)
         if (numSerial < 40000 || numSerial > 60000) {
             return null;
         }
         
-        const daysOffset = 25569; // dias entre 01/01/1900 e 01/01/1970
-        const excelBugOffset = 1; // Excel considera 1900 como bissexto
+        const daysOffset = 25569;
+        const excelBugOffset = 1;
         const millisecondsPerDay = 86400000;
         
-        // Calcular timestamp em milissegundos
         const timestamp = (numSerial - daysOffset + excelBugOffset) * millisecondsPerDay;
         const date = new Date(timestamp);
         
-        // Verificar se a data é válida
-        if (isNaN(date.getTime())) {
-            return null;
-        }
-        
+        if (isNaN(date.getTime())) return null;
         return date;
     }
 
-    /**
-     * Converte data serial do Excel para string formatada
-     */
-    excelDateToString(serial) {
-        const date = this.excelDateToDate(serial);
-        if (date) {
-            return date.toLocaleDateString('pt-BR');
-        }
-        return serial?.toString() || '';
-    }
-
-    /**
-     * Converte data para objeto Date (com suporte a string)
-     */
     parseDate(dataStr) {
-        // Se for número (serial do Excel)
         if (typeof dataStr === 'number' || (typeof dataStr === 'string' && !isNaN(parseFloat(dataStr)))) {
             const numData = parseFloat(dataStr);
-            // Verifica se é um serial do Excel (geralmente entre 40000 e 60000)
             if (numData > 40000 && numData < 60000) {
                 const date = this.excelDateToDate(numData);
                 if (date) return date;
             }
             
-            // Se for timestamp em milissegundos
             if (numData > 60000) {
                 const date = new Date(numData);
-                if (!isNaN(date.getTime())) {
-                    return date;
-                }
+                if (!isNaN(date.getTime())) return date;
             }
         }
         
-        // Tentar parse como string
         if (typeof dataStr === 'string') {
-            // Tenta diferentes formatos
             const date = new Date(dataStr);
-            if (!isNaN(date.getTime())) {
-                return date;
-            }
+            if (!isNaN(date.getTime())) return date;
             
-            // Tenta formato brasileiro (dd/mm/yyyy)
             const parts = dataStr.split('/');
             if (parts.length === 3) {
                 const day = parseInt(parts[0]);
@@ -293,9 +264,7 @@ class DataProcessor {
                 const year = parseInt(parts[2]);
                 if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
                     const date = new Date(year, month, day);
-                    if (!isNaN(date.getTime())) {
-                        return date;
-                    }
+                    if (!isNaN(date.getTime())) return date;
                 }
             }
         }
@@ -303,9 +272,6 @@ class DataProcessor {
         return null;
     }
 
-    /**
-     * Formata data para exibição
-     */
     formatDateDisplay(dataStr) {
         if (!dataStr && dataStr !== 0) return '';
         
@@ -314,13 +280,9 @@ class DataProcessor {
             return date.toLocaleDateString('pt-BR');
         }
         
-        // Se não conseguiu parsear, retorna o valor original
         return dataStr?.toString() || '';
     }
 
-    /**
-     * Obtém dados únicos para filtros
-     */
     getUniqueValues(column) {
         const values = new Set();
         
@@ -332,21 +294,17 @@ class DataProcessor {
         });
         
         return Array.from(values).sort((a, b) => {
-            // Ordenação especial para datas
             if (column === 'DATA') {
                 const dateA = this.parseDate(a);
                 const dateB = this.parseDate(b);
                 if (dateA && dateB) {
-                    return dateB.getTime() - dateA.getTime(); // Mais recente primeiro
+                    return dateB.getTime() - dateA.getTime();
                 }
             }
             return a.localeCompare(b);
         });
     }
 
-    /**
-     * Obtém estatísticas - CONTAGEM NORMAL
-     */
     getStatistics(filteredData = null) {
         const data = filteredData || this.processedData;
         
@@ -364,32 +322,6 @@ class DataProcessor {
             cortePercent: totalItens > 0 ? (corteItems / totalItens) * 100 : 0,
             expedidoPercent: totalItens > 0 ? (expedidoItems / totalItens) * 100 : 0
         };
-    }
-
-    /**
-     * Obtém datas disponíveis para filtro
-     */
-    getAvailableDates() {
-        const dates = new Set();
-        
-        this.processedData.forEach(row => {
-            const data = row['DATA'];
-            if (data !== undefined && data !== null && data !== '') {
-                const formatted = this.formatDateDisplay(data);
-                if (formatted) {
-                    dates.add(formatted);
-                }
-            }
-        });
-        
-        return Array.from(dates).sort((a, b) => {
-            const dateA = this.parseDate(a);
-            const dateB = this.parseDate(b);
-            if (dateA && dateB) {
-                return dateB.getTime() - dateA.getTime(); // Mais recente primeiro
-            }
-            return a.localeCompare(b);
-        });
     }
 }
 
