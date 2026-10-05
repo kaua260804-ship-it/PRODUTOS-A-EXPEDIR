@@ -36,6 +36,10 @@ class Comparativo {
             this.gerarResumoPeriodo();
         });
         
+        document.getElementById('btnGerarSemana').addEventListener('click', () => {
+            this.gerarComparativoSemana();
+        });
+        
         document.getElementById('btnTipoDia').addEventListener('click', () => {
             this.tipoComparativo = 'dia';
             this.atualizarBotoesTipo('btnTipoDia');
@@ -56,6 +60,12 @@ class Comparativo {
             this.atualizarSelectores();
         });
         
+        document.getElementById('btnTipoSemana').addEventListener('click', () => {
+            this.tipoComparativo = 'semana';
+            this.atualizarBotoesTipo('btnTipoSemana');
+            this.atualizarSelectores();
+        });
+        
         document.getElementById('comparativoCategoria').addEventListener('change', (e) => {
             this.filtrosComparativo.categoria = e.target.value;
             this.atualizarDatasDisponiveis();
@@ -71,28 +81,27 @@ class Comparativo {
             this.atualizarDatasDisponiveis();
         });
         
-        // Filtro por TIPO no comparativo
         const comparativoTipoEl = document.getElementById('comparativoTipo');
         if (comparativoTipoEl) {
             comparativoTipoEl.addEventListener('change', (e) => {
                 this.filtrosComparativo.tipo = e.target.value;
-                // Quando o tipo muda, atualiza as datas disponíveis
                 this.atualizarDatasDisponiveis();
             });
         }
     }
 
-    /**
-     * Atualiza as datas/meses disponíveis com base nos filtros aplicados
-     * (evita mostrar datas que não têm dados para o tipo selecionado)
-     */
     atualizarDatasDisponiveis() {
         const selectorsComparativo = document.querySelector('.comparativo-selectors');
         const selectorsPeriodo = document.getElementById('comparativoSelectorsPeriodo');
+        const selectorsSemana = document.getElementById('comparativoSelectorsSemana');
         
         if (this.tipoComparativo === 'periodo') {
             if (selectorsPeriodo && selectorsPeriodo.style.display !== 'none') {
                 this.popularDatasPeriodo();
+            }
+        } else if (this.tipoComparativo === 'semana') {
+            if (selectorsSemana && selectorsSemana.style.display !== 'none') {
+                this.popularDatasSemana();
             }
         } else {
             if (selectorsComparativo && selectorsComparativo.style.display !== 'none') {
@@ -106,7 +115,7 @@ class Comparativo {
     }
 
     atualizarBotoesTipo(btnAtivoId) {
-        ['btnTipoDia', 'btnTipoMes', 'btnTipoPeriodo'].forEach(id => {
+        ['btnTipoDia', 'btnTipoMes', 'btnTipoPeriodo', 'btnTipoSemana'].forEach(id => {
             const btn = document.getElementById(id);
             if (btn) {
                 if (id === btnAtivoId) {
@@ -157,14 +166,21 @@ class Comparativo {
     atualizarSelectores() {
         const selectorsComparativo = document.querySelector('.comparativo-selectors');
         const selectorsPeriodo = document.getElementById('comparativoSelectorsPeriodo');
+        const selectorsSemana = document.getElementById('comparativoSelectorsSemana');
+        
+        // Esconde todos
+        if (selectorsComparativo) selectorsComparativo.style.display = 'none';
+        if (selectorsPeriodo) selectorsPeriodo.style.display = 'none';
+        if (selectorsSemana) selectorsSemana.style.display = 'none';
         
         if (this.tipoComparativo === 'periodo') {
-            if (selectorsComparativo) selectorsComparativo.style.display = 'none';
             if (selectorsPeriodo) selectorsPeriodo.style.display = 'grid';
             this.popularDatasPeriodo();
+        } else if (this.tipoComparativo === 'semana') {
+            if (selectorsSemana) selectorsSemana.style.display = 'grid';
+            this.popularDatasSemana();
         } else {
             if (selectorsComparativo) selectorsComparativo.style.display = 'grid';
-            if (selectorsPeriodo) selectorsPeriodo.style.display = 'none';
             
             if (this.tipoComparativo === 'dia') {
                 this.popularDatas();
@@ -203,7 +219,7 @@ class Comparativo {
     }
 
     /**
-     * Retorna os dados filtrados pelos filtros do comparativo (sem filtro de data)
+     * Retorna dados filtrados por Categoria/Grupo/Subgrupo/Tipo (sem filtro de data)
      */
     getDadosFiltradosBase() {
         return this.dataProcessor.processedData.filter(row => {
@@ -231,23 +247,6 @@ class Comparativo {
         });
     }
 
-    /**
-     * Retorna as datas que possuem dados após aplicar os filtros do comparativo
-     */
-    getDatasDisponiveis() {
-        const dadosFiltrados = this.getDadosFiltradosBase();
-        const datas = new Set();
-        
-        dadosFiltrados.forEach(row => {
-            const dataStr = row['DATA']?.toString();
-            if (dataStr && dataStr.trim() !== '') {
-                datas.add(dataStr);
-            }
-        });
-        
-        return Array.from(datas);
-    }
-
     popularDatas() {
         const dadosFiltrados = this.getDadosFiltradosBase();
         const datas = new Set();
@@ -271,7 +270,6 @@ class Comparativo {
         
         if (!dataBase || !dataComparacao) return;
         
-        // Guardar valores atuais
         const valorBase = dataBase.value;
         const valorComparacao = dataComparacao.value;
         
@@ -300,13 +298,8 @@ class Comparativo {
             dataComparacao.appendChild(optionComparacao);
         });
         
-        // Restaurar valores se ainda existirem
-        if (valorBase && datasArray.includes(valorBase)) {
-            dataBase.value = valorBase;
-        }
-        if (valorComparacao && datasArray.includes(valorComparacao)) {
-            dataComparacao.value = valorComparacao;
-        }
+        if (valorBase && datasArray.includes(valorBase)) dataBase.value = valorBase;
+        if (valorComparacao && datasArray.includes(valorComparacao)) dataComparacao.value = valorComparacao;
     }
 
     popularDatasPeriodo() {
@@ -360,12 +353,67 @@ class Comparativo {
             dataFim.appendChild(optionFim);
         });
         
-        if (valorInicio && datasArray.includes(valorInicio)) {
-            dataInicio.value = valorInicio;
+        if (valorInicio && datasArray.includes(valorInicio)) dataInicio.value = valorInicio;
+        if (valorFim && datasArray.includes(valorFim)) dataFim.value = valorFim;
+    }
+
+    /**
+     * Popular datas para o comparativo por SEMANA
+     * Aqui mostramos todas as datas possíveis como ponto de partida da semana
+     */
+    popularDatasSemana() {
+        const dadosFiltrados = this.getDadosFiltradosBase();
+        const datas = new Set();
+        
+        dadosFiltrados.forEach(row => {
+            const dataStr = row['DATA']?.toString();
+            if (dataStr && dataStr.trim() !== '') {
+                datas.add(dataStr);
+            }
+        });
+        
+        const datasArray = Array.from(datas).sort((a, b) => {
+            const dateA = this.dataProcessor.parseDate(a);
+            const dateB = this.dataProcessor.parseDate(b);
+            if (dateA && dateB) return dateB - dateA;
+            return 0;
+        });
+        
+        const semana1Inicio = document.getElementById('semana1Inicio');
+        const semana2Inicio = document.getElementById('semana2Inicio');
+        
+        if (!semana1Inicio || !semana2Inicio) return;
+        
+        const valorSemana1 = semana1Inicio.value;
+        const valorSemana2 = semana2Inicio.value;
+        
+        semana1Inicio.innerHTML = '<option value="">Selecione o início da semana 1</option>';
+        semana2Inicio.innerHTML = '<option value="">Selecione o início da semana 2</option>';
+        
+        if (datasArray.length === 0) {
+            const optVazio = document.createElement('option');
+            optVazio.value = '';
+            optVazio.textContent = 'Nenhuma data disponível';
+            optVazio.disabled = true;
+            semana1Inicio.appendChild(optVazio.cloneNode(true));
+            semana2Inicio.appendChild(optVazio.cloneNode(true));
+            return;
         }
-        if (valorFim && datasArray.includes(valorFim)) {
-            dataFim.value = valorFim;
-        }
+        
+        datasArray.forEach(data => {
+            const option1 = document.createElement('option');
+            option1.value = data;
+            option1.textContent = this.dataProcessor.formatDateDisplay(data);
+            semana1Inicio.appendChild(option1);
+            
+            const option2 = document.createElement('option');
+            option2.value = data;
+            option2.textContent = this.dataProcessor.formatDateDisplay(data);
+            semana2Inicio.appendChild(option2);
+        });
+        
+        if (valorSemana1 && datasArray.includes(valorSemana1)) semana1Inicio.value = valorSemana1;
+        if (valorSemana2 && datasArray.includes(valorSemana2)) semana2Inicio.value = valorSemana2;
     }
 
     popularMeses() {
@@ -414,12 +462,8 @@ class Comparativo {
             dataComparacao.appendChild(optionComparacao);
         });
         
-        if (valorBase && meses.includes(valorBase)) {
-            dataBase.value = valorBase;
-        }
-        if (valorComparacao && meses.includes(valorComparacao)) {
-            dataComparacao.value = valorComparacao;
-        }
+        if (valorBase && meses.includes(valorBase)) dataBase.value = valorBase;
+        if (valorComparacao && meses.includes(valorComparacao)) dataComparacao.value = valorComparacao;
     }
 
     getMesesDisponiveis() {
@@ -504,9 +548,8 @@ class Comparativo {
         dadosBase = this.aplicarFiltrosComparativo(dadosBase);
         dadosComparacao = this.aplicarFiltrosComparativo(dadosComparacao);
         
-        // Se alguma das datas não tem dados após aplicar filtros
         if (dadosBase.length === 0 && dadosComparacao.length === 0) {
-            alert(`Não há dados para as datas selecionadas com os filtros aplicados.\n\nTente remover alguns filtros (Categoria, Grupo, Subgrupo ou Tipo) ou escolher outras datas.`);
+            alert(`Não há dados para os períodos selecionados com os filtros aplicados.\n\nTente remover alguns filtros (Categoria, Grupo, Subgrupo ou Tipo) ou escolher outras datas.`);
             return;
         }
         
@@ -529,8 +572,347 @@ class Comparativo {
     }
 
     /**
-     * Retorna uma descrição dos filtros aplicados para mensagens de erro
+     * Gera o comparativo entre duas SEMANAS (7 dias cada)
      */
+    gerarComparativoSemana() {
+        const semana1Inicio = document.getElementById('semana1Inicio').value;
+        const semana2Inicio = document.getElementById('semana2Inicio').value;
+        
+        if (!semana1Inicio || !semana2Inicio) {
+            alert('Por favor, selecione a data de início das duas semanas');
+            return;
+        }
+        
+        const data1Inicio = this.dataProcessor.parseDate(semana1Inicio);
+        const data2Inicio = this.dataProcessor.parseDate(semana2Inicio);
+        
+        if (!data1Inicio || !data2Inicio) {
+            alert('Datas inválidas. Por favor, selecione novamente.');
+            return;
+        }
+        
+        // Calcular data fim = início + 6 dias (7 dias no total)
+        const data1Fim = new Date(data1Inicio.getTime());
+        data1Fim.setDate(data1Fim.getDate() + 6);
+        
+        const data2Fim = new Date(data2Inicio.getTime());
+        data2Fim.setDate(data2Fim.getDate() + 6);
+        
+        // Filtrar dados das duas semanas
+        let dadosSemana1 = this.dataProcessor.processedData.filter(row => {
+            const data = this.dataProcessor.parseDate(row['DATA']);
+            if (!data) return false;
+            return data >= data1Inicio && data <= data1Fim;
+        });
+        
+        let dadosSemana2 = this.dataProcessor.processedData.filter(row => {
+            const data = this.dataProcessor.parseDate(row['DATA']);
+            if (!data) return false;
+            return data >= data2Inicio && data <= data2Fim;
+        });
+        
+        dadosSemana1 = this.aplicarFiltrosComparativo(dadosSemana1);
+        dadosSemana2 = this.aplicarFiltrosComparativo(dadosSemana2);
+        
+        if (dadosSemana1.length === 0 && dadosSemana2.length === 0) {
+            alert(`Não há dados para as semanas selecionadas com os filtros aplicados.\n\nTente remover alguns filtros ou escolher outras datas.`);
+            return;
+        }
+        
+        if (dadosSemana1.length === 0) {
+            const filtrosDesc = this.getFiltrosDescricao();
+            alert(`Não há dados para a Semana 1 (${this.dataProcessor.formatDateDisplay(semana1Inicio)} a ${this.formatDateObj(data1Fim)})${filtrosDesc}.\n\nTente escolher outra data ou remover alguns filtros.`);
+            return;
+        }
+        
+        if (dadosSemana2.length === 0) {
+            const filtrosDesc = this.getFiltrosDescricao();
+            alert(`Não há dados para a Semana 2 (${this.dataProcessor.formatDateDisplay(semana2Inicio)} a ${this.formatDateObj(data2Fim)})${filtrosDesc}.\n\nTente escolher outra data ou remover alguns filtros.`);
+            return;
+        }
+        
+        const statsSemana1 = this.calcularEstatisticas(dadosSemana1);
+        const statsSemana2 = this.calcularEstatisticas(dadosSemana2);
+        
+        // Agrupar por dia para mostrar detalhamento
+        const dadosPorDiaSemana1 = this.agruparPorData(dadosSemana1);
+        const dadosPorDiaSemana2 = this.agruparPorData(dadosSemana2);
+        
+        this.exibirResultadoSemana(
+            statsSemana1, 
+            statsSemana2, 
+            data1Inicio, 
+            data1Fim, 
+            data2Inicio, 
+            data2Fim,
+            dadosPorDiaSemana1,
+            dadosPorDiaSemana2
+        );
+    }
+
+    /**
+     * Formata um objeto Date para exibição
+     */
+    formatDateObj(date) {
+        if (!date) return '';
+        return date.toLocaleDateString('pt-BR');
+    }
+
+    /**
+     * Exibe o resultado do comparativo entre semanas
+     */
+    exibirResultadoSemana(statsSemana1, statsSemana2, data1Inicio, data1Fim, data2Inicio, data2Fim, dadosPorDia1, dadosPorDia2) {
+        const container = document.getElementById('comparativoResultado');
+        container.style.display = 'block';
+        
+        const periodo1 = `${this.formatDateObj(data1Inicio)} a ${this.formatDateObj(data1Fim)}`;
+        const periodo2 = `${this.formatDateObj(data2Inicio)} a ${this.formatDateObj(data2Fim)}`;
+        
+        const diffCortados = statsSemana1.percentualCortados - statsSemana2.percentualCortados;
+        const diffAbertos = statsSemana1.percentualAbertos - statsSemana2.percentualAbertos;
+        const diffAtendidos = statsSemana1.percentualAtendidos - statsSemana2.percentualAtendidos;
+        
+        const indCortados = this.determinarIndicador(diffCortados, false);
+        const indAbertos = this.determinarIndicador(diffAbertos, false);
+        const indAtendidos = this.determinarIndicador(diffAtendidos, true);
+        
+        // Montar linhas da tabela de detalhamento
+        const linhasTabela1 = dadosPorDia1.map(dia => `
+            <tr>
+                <td class="tabela-data">${dia.dataFormatada}</td>
+                <td class="tabela-numero">${dia.stats.totalItens.toLocaleString('pt-BR')}</td>
+                <td class="tabela-numero tabela-aberto">
+                    ${dia.stats.itensAbertos.toLocaleString('pt-BR')}
+                    <span class="tabela-pct">(${dia.stats.percentualAbertos.toFixed(1)}%)</span>
+                </td>
+                <td class="tabela-numero tabela-corte">
+                    ${dia.stats.itensCortados.toLocaleString('pt-BR')}
+                    <span class="tabela-pct">(${dia.stats.percentualCortados.toFixed(1)}%)</span>
+                </td>
+                <td class="tabela-numero tabela-expedido">
+                    ${dia.stats.itensAtendidos.toLocaleString('pt-BR')}
+                    <span class="tabela-pct">(${dia.stats.percentualAtendidos.toFixed(1)}%)</span>
+                </td>
+            </tr>
+        `).join('');
+        
+        const linhasTabela2 = dadosPorDia2.map(dia => `
+            <tr>
+                <td class="tabela-data">${dia.dataFormatada}</td>
+                <td class="tabela-numero">${dia.stats.totalItens.toLocaleString('pt-BR')}</td>
+                <td class="tabela-numero tabela-aberto">
+                    ${dia.stats.itensAbertos.toLocaleString('pt-BR')}
+                    <span class="tabela-pct">(${dia.stats.percentualAbertos.toFixed(1)}%)</span>
+                </td>
+                <td class="tabela-numero tabela-corte">
+                    ${dia.stats.itensCortados.toLocaleString('pt-BR')}
+                    <span class="tabela-pct">(${dia.stats.percentualCortados.toFixed(1)}%)</span>
+                </td>
+                <td class="tabela-numero tabela-expedido">
+                    ${dia.stats.itensAtendidos.toLocaleString('pt-BR')}
+                    <span class="tabela-pct">(${dia.stats.percentualAtendidos.toFixed(1)}%)</span>
+                </td>
+            </tr>
+        `).join('');
+        
+        container.innerHTML = `
+            <div class="comparativo-header-grande">
+                <div class="comparativo-header-grande-icon">
+                    <i class="fas fa-calendar-week"></i>
+                </div>
+                <h2 class="comparativo-header-grande-title">
+                    COMPARATIVO DE SEMANAS
+                </h2>
+                <div class="comparativo-header-periodo">
+                    <span>${periodo1}</span>
+                    <i class="fas fa-arrow-right"></i>
+                    <span>${periodo2}</span>
+                </div>
+                <div class="comparativo-header-grande-total">
+                    <i class="fas fa-boxes"></i>
+                    <span>ITENS PEDIDOS: <strong>${statsSemana1.totalItens.toLocaleString('pt-BR')}</strong> vs <strong>${statsSemana2.totalItens.toLocaleString('pt-BR')}</strong></span>
+                </div>
+            </div>
+
+            <div class="periodo-acumulado-titulo">
+                <i class="fas fa-chart-pie"></i>
+                <span>ACUMULADO DA SEMANA 1 (${periodo1})</span>
+            </div>
+            
+            <div class="comparativo-grid-grande">
+                <div class="comparativo-card-grande ${indCortados.tipo}">
+                    <div class="comparativo-card-grande-header">
+                        <div class="comparativo-card-grande-icon">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="comparativo-card-grande-label">ITENS CORTADOS</div>
+                    </div>
+                    <div class="comparativo-card-grande-body">
+                        <div class="comparativo-card-grande-number">
+                            ${statsSemana1.itensCortados.toLocaleString('pt-BR')}
+                        </div>
+                        <div class="comparativo-card-grande-percent">
+                            ${statsSemana1.percentualCortados.toFixed(1)}%
+                        </div>
+                    </div>
+                    <div class="comparativo-card-grande-footer ${indCortados.tipo}">
+                        <span class="diff-icon">${indCortados.icone}</span>
+                        <span><strong>${indCortados.texto}</strong> de ${Math.abs(diffCortados).toFixed(1)}%</span>
+                        <span class="diff-label">em relação à semana anterior</span>
+                    </div>
+                </div>
+
+                <div class="comparativo-card-grande ${indAbertos.tipo}">
+                    <div class="comparativo-card-grande-header">
+                        <div class="comparativo-card-grande-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="comparativo-card-grande-label">ITENS EM ABERTO</div>
+                    </div>
+                    <div class="comparativo-card-grande-body">
+                        <div class="comparativo-card-grande-number">
+                            ${statsSemana1.itensAbertos.toLocaleString('pt-BR')}
+                        </div>
+                        <div class="comparativo-card-grande-percent">
+                            ${statsSemana1.percentualAbertos.toFixed(1)}%
+                        </div>
+                    </div>
+                    <div class="comparativo-card-grande-footer ${indAbertos.tipo}">
+                        <span class="diff-icon">${indAbertos.icone}</span>
+                        <span><strong>${indAbertos.texto}</strong> de ${Math.abs(diffAbertos).toFixed(1)}%</span>
+                        <span class="diff-label">em relação à semana anterior</span>
+                    </div>
+                </div>
+
+                <div class="comparativo-card-grande ${indAtendidos.tipo}">
+                    <div class="comparativo-card-grande-header">
+                        <div class="comparativo-card-grande-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="comparativo-card-grande-label">ITENS ATENDIDOS</div>
+                    </div>
+                    <div class="comparativo-card-grande-body">
+                        <div class="comparativo-card-grande-number">
+                            ${statsSemana1.itensAtendidos.toLocaleString('pt-BR')}
+                        </div>
+                        <div class="comparativo-card-grande-percent">
+                            ${statsSemana1.percentualAtendidos.toFixed(1)}%
+                        </div>
+                    </div>
+                    <div class="comparativo-card-grande-footer ${indAtendidos.tipo}">
+                        <span class="diff-icon">${indAtendidos.icone}</span>
+                        <span><strong>${indAtendidos.texto}</strong> de ${Math.abs(diffAtendidos).toFixed(1)}%</span>
+                        <span class="diff-label">em relação à semana anterior</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="periodo-tabela-titulo">
+                <i class="fas fa-table"></i>
+                <span>DETALHAMENTO SEMANA 1 (${periodo1})</span>
+            </div>
+            
+            <div class="periodo-tabela-container">
+                <table class="periodo-tabela">
+                    <thead>
+                        <tr>
+                            <th>DATA</th>
+                            <th>ITENS PEDIDOS</th>
+                            <th>ITENS EM ABERTO</th>
+                            <th>ITENS CORTADOS</th>
+                            <th>EFICIÊNCIA DE ATENDIMENTO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${linhasTabela1}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="periodo-acumulado-titulo">
+                <i class="fas fa-chart-pie"></i>
+                <span>ACUMULADO DA SEMANA 2 (${periodo2})</span>
+            </div>
+            
+            <div class="comparativo-grid-grande">
+                <div class="comparativo-card-grande ${this.getClassificacaoPorPercentual(statsSemana2.percentualCortados, 'corte')}">
+                    <div class="comparativo-card-grande-header">
+                        <div class="comparativo-card-grande-icon">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="comparativo-card-grande-label">ITENS CORTADOS</div>
+                    </div>
+                    <div class="comparativo-card-grande-body">
+                        <div class="comparativo-card-grande-number">
+                            ${statsSemana2.itensCortados.toLocaleString('pt-BR')}
+                        </div>
+                        <div class="comparativo-card-grande-percent">
+                            ${statsSemana2.percentualCortados.toFixed(1)}%
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comparativo-card-grande ${this.getClassificacaoPorPercentual(statsSemana2.percentualAbertos, 'aberto')}">
+                    <div class="comparativo-card-grande-header">
+                        <div class="comparativo-card-grande-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="comparativo-card-grande-label">ITENS EM ABERTO</div>
+                    </div>
+                    <div class="comparativo-card-grande-body">
+                        <div class="comparativo-card-grande-number">
+                            ${statsSemana2.itensAbertos.toLocaleString('pt-BR')}
+                        </div>
+                        <div class="comparativo-card-grande-percent">
+                            ${statsSemana2.percentualAbertos.toFixed(1)}%
+                        </div>
+                    </div>
+                </div>
+
+                <div class="comparativo-card-grande ${this.getClassificacaoPorPercentual(statsSemana2.percentualAtendidos, 'atendido')}">
+                    <div class="comparativo-card-grande-header">
+                        <div class="comparativo-card-grande-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="comparativo-card-grande-label">ITENS ATENDIDOS</div>
+                    </div>
+                    <div class="comparativo-card-grande-body">
+                        <div class="comparativo-card-grande-number">
+                            ${statsSemana2.itensAtendidos.toLocaleString('pt-BR')}
+                        </div>
+                        <div class="comparativo-card-grande-percent">
+                            ${statsSemana2.percentualAtendidos.toFixed(1)}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="periodo-tabela-titulo">
+                <i class="fas fa-table"></i>
+                <span>DETALHAMENTO SEMANA 2 (${periodo2})</span>
+            </div>
+            
+            <div class="periodo-tabela-container">
+                <table class="periodo-tabela">
+                    <thead>
+                        <tr>
+                            <th>DATA</th>
+                            <th>ITENS PEDIDOS</th>
+                            <th>ITENS EM ABERTO</th>
+                            <th>ITENS CORTADOS</th>
+                            <th>EFICIÊNCIA DE ATENDIMENTO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${linhasTabela2}
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
     getFiltrosDescricao() {
         const filtros = [];
         if (this.filtrosComparativo.categoria) filtros.push(`Categoria: ${this.filtrosComparativo.categoria}`);
@@ -754,23 +1136,17 @@ class Comparativo {
         container.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    /**
-     * Classifica o card por percentual (mantém cores consistentes com a legenda)
-     */
     getClassificacaoPorPercentual(percentual, tipo) {
         if (tipo === 'atendido') {
-            // Eficiência: sempre verde se >= 80%, azul/neutro se médio, vermelho se baixo
             if (percentual >= 80) return 'bom';
             if (percentual >= 50) return 'neutro';
             return 'ruim';
         }
         if (tipo === 'corte') {
-            // Cortados: sempre vermelho (é ruim por natureza)
             if (percentual > 0) return 'ruim';
             return 'bom';
         }
         if (tipo === 'aberto') {
-            // Abertos: sempre âmbar/neutro (não é bom nem ruim)
             if (percentual > 5) return 'neutro';
             return 'bom';
         }
