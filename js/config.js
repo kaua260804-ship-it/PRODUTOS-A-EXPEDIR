@@ -3,8 +3,11 @@
  */
 
 const CONFIG = {
-    // Caminho do arquivo Excel
+    // Caminho do arquivo Excel principal
     EXCEL_FILE_PATH: 'dados/PEDIDOS A EXPEDIR.xlsx',
+    
+    // Caminho do arquivo Excel de TIPOS (filtro adicional)
+    EXCEL_TIPOS_PATH: 'dados/TIPOS.xlsx',
     
     // Nomes das abas
     SHEETS: {
@@ -12,16 +15,18 @@ const CONFIG = {
         CORTE: 'CORTE',
         ABERTO: 'ABERTO',
         BS_CAD: 'BS CAD',
-        ESTCD: 'ESTCD'
+        ESTCD: 'ESTCD',
+        TIPOS: 'TIPOS' // Nome da aba do arquivo de tipos
     },
     
     // Colunas obrigatórias
     REQUIRED_COLUMNS: {
         GERAL: ['NRO DO PEDIDO', 'CODIGO', 'EMPRESA', 'DATA'],
-        CORTE: ['CAD'], // ou ['NRO DO PEDIDO', 'CODIGO', 'EMPRESA']
-        ABERTO: ['CAD'], // ou ['NRO DO PEDIDO', 'CODIGO', 'EMPRESA']
+        CORTE: ['CAD'],
+        ABERTO: ['CAD'],
         BS_CAD: ['SEQ PRODUTO', 'NIVEL 1', 'NIVEL 2', 'NIVEL 3'],
-        ESTCD: ['Código Produto']
+        ESTCD: ['Código Produto'],
+        TIPOS: ['SeqProduto', 'Produto', 'tipo']
     },
     
     // Configurações de paginação
