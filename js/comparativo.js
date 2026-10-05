@@ -9,7 +9,8 @@ class Comparativo {
         this.filtrosComparativo = {
             categoria: '',
             grupo: '',
-            subgrupo: ''
+            subgrupo: '',
+            tipo: ''
         };
         this.initializeEventListeners();
     }
@@ -66,6 +67,14 @@ class Comparativo {
         document.getElementById('comparativoSubgrupo').addEventListener('change', (e) => {
             this.filtrosComparativo.subgrupo = e.target.value;
         });
+        
+        // Novo: filtro por TIPO no comparativo
+        const comparativoTipoEl = document.getElementById('comparativoTipo');
+        if (comparativoTipoEl) {
+            comparativoTipoEl.addEventListener('change', (e) => {
+                this.filtrosComparativo.tipo = e.target.value;
+            });
+        }
     }
 
     atualizarBotoesTipo(btnAtivoId) {
@@ -88,7 +97,8 @@ class Comparativo {
         this.filtrosComparativo = {
             categoria: '',
             grupo: '',
-            subgrupo: ''
+            subgrupo: '',
+            tipo: ''
         };
         
         this.popularFiltrosComparativo();
@@ -145,6 +155,10 @@ class Comparativo {
         
         const subgrupos = this.dataProcessor.getUniqueValues('SUBGRUPO');
         this.popularSelect('comparativoSubgrupo', subgrupos, 'Todos');
+        
+        // Novo: popular tipos
+        const tipos = this.dataProcessor.getUniqueTipos();
+        this.popularSelect('comparativoTipo', tipos, 'Todos');
     }
 
     popularSelect(selectId, values, placeholder) {
@@ -198,7 +212,6 @@ class Comparativo {
         dataInicio.innerHTML = '<option value="">Selecione a data inicial</option>';
         dataFim.innerHTML = '<option value="">Selecione a data final</option>';
         
-        // Ordenar datas da mais recente para a mais antiga
         const datasOrdenadas = datas.sort((a, b) => {
             const dateA = this.dataProcessor.parseDate(a);
             const dateB = this.dataProcessor.parseDate(b);
@@ -278,6 +291,12 @@ class Comparativo {
                 return false;
             }
             
+            // Novo: filtro por TIPO
+            if (this.filtrosComparativo.tipo && 
+                row['TIPO']?.toString().trim() !== this.filtrosComparativo.tipo.trim()) {
+                return false;
+            }
+            
             return true;
         });
     }
@@ -333,7 +352,7 @@ class Comparativo {
     }
 
     /**
-     * NOVO: Gera resumo por período (dia a dia)
+     * Gera resumo por período (dia a dia)
      */
     gerarResumoPeriodo() {
         const dataInicio = document.getElementById('dataInicioPeriodo').value;
@@ -357,7 +376,6 @@ class Comparativo {
             return;
         }
         
-        // Coletar todos os dados do período
         let dadosPeriodo = this.dataProcessor.processedData.filter(row => {
             const data = this.dataProcessor.parseDate(row['DATA']);
             if (!data) return false;
@@ -371,13 +389,9 @@ class Comparativo {
             return;
         }
         
-        // Agrupar dados por data
         const dadosPorData = this.agruparPorData(dadosPeriodo);
-        
-        // Calcular acumulado total do período
         const statsAcumulado = this.calcularEstatisticas(dadosPeriodo);
         
-        // Exibir resultado
         this.exibirResumoPeriodo(statsAcumulado, dadosPorData, dataInicio, dataFim);
     }
 
@@ -397,7 +411,6 @@ class Comparativo {
             grupos[dataStr].push(row);
         });
         
-        // Converter para array de objetos com estatísticas
         const resultado = Object.keys(grupos).map(dataStr => {
             const dadosDoDia = grupos[dataStr];
             const stats = this.calcularEstatisticas(dadosDoDia);
@@ -411,7 +424,6 @@ class Comparativo {
             };
         });
         
-        // Ordenar por data (mais antiga primeiro para mostrar evolução)
         resultado.sort((a, b) => {
             if (a.dataObj && b.dataObj) {
                 return a.dataObj.getTime() - b.dataObj.getTime();
@@ -432,7 +444,6 @@ class Comparativo {
         const periodoInicio = this.dataProcessor.formatDateDisplay(dataInicio);
         const periodoFim = this.dataProcessor.formatDateDisplay(dataFim);
         
-        // Construir linhas da tabela
         const linhasTabela = dadosPorData.map(dia => {
             const s = dia.stats;
             return `
@@ -456,7 +467,6 @@ class Comparativo {
         }).join('');
         
         container.innerHTML = `
-            <!-- HEADER DO PERÍODO -->
             <div class="comparativo-header-grande">
                 <div class="comparativo-header-grande-icon">
                     <i class="fas fa-calendar-week"></i>
@@ -475,7 +485,6 @@ class Comparativo {
                 </div>
             </div>
 
-            <!-- ACUMULADO DO PERÍODO -->
             <div class="periodo-acumulado-titulo">
                 <i class="fas fa-chart-pie"></i>
                 <span>ACUMULADO DO PERÍODO</span>
@@ -534,7 +543,6 @@ class Comparativo {
                 </div>
             </div>
 
-            <!-- TABELA DIA A DIA -->
             <div class="periodo-tabela-titulo">
                 <i class="fas fa-table"></i>
                 <span>DETALHAMENTO POR DIA</span>
