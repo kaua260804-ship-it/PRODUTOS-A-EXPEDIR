@@ -211,6 +211,79 @@
     font-size: var(--font-size-md);
 }
 
+/* Selectores de período (novo tipo) */
+.comparativo-selectors-periodo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+    align-items: end;
+    margin-bottom: var(--spacing-md);
+}
+
+.comparativo-selectors-periodo .comparativo-selector {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.comparativo-selectors-periodo .comparativo-selector label {
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    text-align: center;
+}
+
+.comparativo-selectors-periodo .comparativo-selector select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: var(--font-size-sm);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.comparativo-selectors-periodo .comparativo-selector select:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+#btnGerarPeriodo {
+    grid-column: 1 / -1;
+    padding: 14px 28px;
+    font-size: var(--font-size-md);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+    color: var(--text-light);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--box-shadow);
+    white-space: nowrap;
+    width: 100%;
+}
+
+#btnGerarPeriodo:hover {
+    box-shadow: var(--box-shadow-lg);
+    transform: translateY(-2px);
+}
+
+#btnGerarPeriodo:active {
+    transform: translateY(0);
+    box-shadow: var(--box-shadow);
+}
+
+#btnGerarPeriodo i {
+    font-size: var(--font-size-md);
+}
+
 /* Filtros do comparativo */
 .comparativo-filtros {
     margin-bottom: var(--spacing-lg);
@@ -318,6 +391,25 @@
 .comparativo-header-grande-total strong {
     color: #f1c40f;
     font-size: var(--font-size-lg);
+}
+
+/* Header do período */
+.comparativo-header-periodo {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: 8px 20px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 30px;
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    margin-bottom: var(--spacing-sm);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.comparativo-header-periodo i {
+    color: #f1c40f;
+    font-size: var(--font-size-md);
 }
 
 /* ==========================================
@@ -448,197 +540,101 @@
     color: var(--text-muted);
 }
 
-/* Loading overlay */
-.loading-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+/* ==========================================
+   NOVO TIPO: POR PERÍODO
+   ========================================== */
+
+/* Títulos das seções */
+.periodo-acumulado-titulo,
+.periodo-tabela-titulo {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 9999;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    margin: var(--spacing-lg) 0 var(--spacing-md) 0;
+    background: linear-gradient(90deg, transparent, var(--bg-primary), transparent);
+    font-size: var(--font-size-md);
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
-.loading-content {
+.periodo-acumulado-titulo i,
+.periodo-tabela-titulo i {
+    color: var(--secondary-color);
+    font-size: var(--font-size-lg);
+}
+
+/* Tabela do período */
+.periodo-tabela-container {
     background-color: var(--bg-secondary);
-    padding: var(--spacing-xl);
     border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.periodo-tabela {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--font-size-sm);
+}
+
+.periodo-tabela thead {
+    background: linear-gradient(135deg, var(--primary-color), #34495e);
+    color: var(--text-light);
+}
+
+.periodo-tabela th {
+    padding: 14px 12px;
     text-align: center;
-    box-shadow: var(--box-shadow-lg);
+    font-weight: 700;
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.loading-spinner {
-    display: inline-block;
-    width: 40px;
-    height: 40px;
-    border: 4px solid var(--bg-primary);
-    border-radius: 50%;
-    border-top-color: var(--secondary-color);
-    animation: spin 0.6s linear infinite;
-    margin-bottom: var(--spacing-md);
+.periodo-tabela th:last-child {
+    border-right: none;
 }
 
-/* Animação de entrada do modal */
-@keyframes modalIn {
-    from {
-        opacity: 0;
-        transform: translateY(-50px) scale(0.9);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+.periodo-tabela tbody tr {
+    border-bottom: 1px solid var(--border-color);
+    transition: var(--transition);
 }
 
-@keyframes overlayIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+.periodo-tabela tbody tr:hover {
+    background-color: var(--bg-primary);
 }
 
-.modal .modal-content {
-    animation: modalIn 0.3s ease-out;
+.periodo-tabela tbody tr:last-child {
+    border-bottom: none;
 }
 
-.modal .modal-overlay {
-    animation: overlayIn 0.3s ease-out;
+.periodo-tabela td {
+    padding: 12px;
+    text-align: center;
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
 }
 
-/* Responsivo */
-@media (max-width: 992px) {
-    .comparativo-grid-grande {
-        grid-template-columns: 1fr 1fr;
-    }
+.periodo-tabela .tabela-data {
+    font-weight: 700;
+    color: var(--text-primary);
+    background-color: rgba(52, 152, 219, 0.05);
+    white-space: nowrap;
 }
 
-@media (max-width: 768px) {
-    .modal-content {
-        width: 100%;
-        max-height: 90vh;
-        margin: 5px;
-    }
-    
-    .modal-header {
-        padding: var(--spacing-sm);
-    }
-    
-    .modal-body {
-        padding: var(--spacing-sm);
-    }
-    
-    .comparativo-selectors {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-sm);
-    }
-    
-    .comparativo-tipo {
-        flex-direction: column;
-    }
-    
-    .comparativo-tipo-btn {
-        width: 100%;
-        justify-content: center;
-        min-width: auto;
-    }
-    
-    .comparativo-filtros .filters-grid {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-sm);
-    }
-    
-    .comparativo-grid-grande {
-        grid-template-columns: 1fr;
-    }
-    
-    .comparativo-card-grande {
-        padding: var(--spacing-md);
-    }
-    
-    .comparativo-card-grande-number {
-        font-size: 36px;
-    }
-    
-    .comparativo-header-grande-title {
-        font-size: var(--font-size-lg);
-    }
-    
-    .comparativo-header-grande-total {
-        font-size: var(--font-size-sm);
-        padding: 6px 16px;
-    }
-    
-    .comparativo-header-grande-total strong {
-        font-size: var(--font-size-md);
-    }
+.periodo-tabela .tabela-numero {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
 }
 
-@media (max-width: 480px) {
-    .modal-content {
-        width: 100%;
-        max-height: 100vh;
-        margin: 0;
-        border-radius: 0;
-    }
-    
-    .modal-header {
-        padding: var(--spacing-xs);
-    }
-    
-    .modal-title {
-        font-size: var(--font-size-sm);
-    }
-    
-    .modal-body {
-        padding: var(--spacing-xs);
-    }
-    
-    .comparativo-tipo-btn {
-        padding: 6px 10px;
-        font-size: var(--font-size-xs);
-    }
-    
-    .comparativo-card-grande-number {
-        font-size: 28px;
-    }
-    
-    .comparativo-card-grande-percent {
-        font-size: var(--font-size-md);
-    }
-    
-    .comparativo-header-grande {
-        padding: var(--spacing-md);
-    }
-    
-    .comparativo-header-grande-title {
-        font-size: var(--font-size-md);
-    }
-    
-    .comparativo-header-grande-icon {
-        font-size: 24px;
-    }
-}
-
-/* Scrollbar personalizada para o modal */
-.modal-content::-webkit-scrollbar {
-    width: 6px;
-}
-
-.modal-content::-webkit-scrollbar-track {
-    background: var(--bg-primary);
-    border-radius: 3px;
-}
-
-.modal-content::-webkit-scrollbar-thumb {
-    background: var(--text-muted);
-    border-radius: 3px;
-}
-
-.modal-content::-webkit-scrollbar-thumb:hover {
-    background: var(--text-secondary);
-}
+.periodo-tabela .tabela-pct {
+    display: block;
+    font-size: var(--font-size-xs);
+    font-weight: 500
