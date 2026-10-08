@@ -668,41 +668,33 @@ class Comparativo {
 
     /**
      * Gera a tabela TRANSPOSTA (datas nas colunas, métricas nas linhas)
-     * Apenas as datas presentes na semana 1 (para alinhamento lado a lado)
+     * Recebe APENAS os dados de UMA semana, então mostra só as datas dessa semana
      */
-    gerarTabelaTransposta(dadosPorDia1, dadosPorDia2) {
+    gerarTabelaTransposta(dadosPorDia) {
+        if (!dadosPorDia || dadosPorDia.length === 0) {
+            return '<p style="text-align:center;color:var(--text-muted);padding:20px;">Sem dados no período</p>';
+        }
+        
         // Mapa: data -> stats
-        const mapa1 = {};
-        const mapa2 = {};
-        
-        dadosPorDia1.forEach(d => { mapa1[d.dataFormatada] = d.stats; });
-        dadosPorDia2.forEach(d => { mapa2[d.dataFormatada] = d.stats; });
-        
-        // Todas as datas únicas (ordenadas)
-        const todasDatas = Array.from(new Set([
-            ...dadosPorDia1.map(d => d.dataFormatada),
-            ...dadosPorDia2.map(d => d.dataFormatada)
-        ])).sort((a, b) => {
-            const [dA, mA, aA] = a.split('/');
-            const [dB, mB, aB] = b.split('/');
-            return new Date(aA, mA - 1, dA) - new Date(aB, mB - 1, dB);
+        const mapaStats = {};
+        dadosPorDia.forEach(d => { 
+            mapaStats[d.dataFormatada] = d.stats; 
         });
         
-        if (todasDatas.length === 0) {
-            return '<p style="text-align:center;color:var(--text-muted);">Sem dados</p>';
-        }
+        // Datas desta semana, na ordem em que vieram (já ordenadas por agruparPorData)
+        const datas = dadosPorDia.map(d => d.dataFormatada);
         
         // Construir cabeçalho: MÉTRICA | Data1 | Data2 | ...
         const cabecalho = `
             <thead>
                 <tr>
                     <th class="col-metrica">MÉTRICA</th>
-                    ${todasDatas.map(data => `<th class="col-data">${data}</th>`).join('')}
+                    ${datas.map(data => `<th class="col-data">${data}</th>`).join('')}
                 </tr>
             </thead>
         `;
         
-        // Linhas: cada métrica
+        // Definição das métricas (linhas)
         const linhasMetricas = [
             {
                 label: 'ITENS PEDIDOS',
@@ -727,25 +719,9 @@ class Comparativo {
         ];
         
         const linhas = linhasMetricas.map(metrica => {
-            const celulas = todasDatas.map(data => {
-                const stats1 = mapa1[data];
-                const stats2 = mapa2[data];
-                
-                // Se ambos têm dados (raro), mostra os dois
-                if (stats1 && stats2) {
-                    return `<td class="${metrica.classe}">
-                        <div class="duplo-valor">
-                            <span>${metrica.valorFn(stats1)}</span>
-                            <span class="duplo-sep">/</span>
-                            <span>${metrica.valorFn(stats2)}</span>
-                        </div>
-                    </td>`;
-                }
-                
-                const stats = stats1 || stats2;
-                const origem = stats1 ? 'semana1' : 'semana2';
-                
-                return `<td class="${metrica.classe} ${origem}">${metrica.valorFn(stats)}</td>`;
+            const celulas = datas.map(data => {
+                const stats = mapaStats[data];
+                return `<td class="${metrica.classe}">${metrica.valorFn(stats)}</td>`;
             }).join('');
             
             return `<tr>
@@ -758,7 +734,7 @@ class Comparativo {
     }
 
     /**
-     * Exibe o resultado do comparativo entre semanas (com TABELA TRANSPOSTA)
+     * Exibe o resultado do comparativo entre semanas (com TABELA TRANSPOSTA por semana)
      */
     exibirResultadoSemana(statsSemana1, statsSemana2, data1Inicio, data1Fim, data2Inicio, data2Fim, dadosPorDia1, dadosPorDia2) {
         const container = document.getElementById('comparativoResultado');
@@ -775,7 +751,9 @@ class Comparativo {
         const indAbertos = this.determinarIndicador(diffAbertos, false);
         const indAtendidos = this.determinarIndicador(diffAtendidos, true);
         
-        const tabelaTransposta = this.gerarTabelaTransposta(dadosPorDia1, dadosPorDia2);
+        // Tabelas transpostas SEPARADAS (cada uma só com as datas da sua semana)
+        const tabelaTransposta1 = this.gerarTabelaTransposta(dadosPorDia1);
+        const tabelaTransposta2 = this.gerarTabelaTransposta(dadosPorDia2);
         
         container.innerHTML = `
             <div class="comparativo-header-grande">
@@ -798,7 +776,8 @@ class Comparativo {
                 </div>
             </div>
 
-            <div class="periodo-acumulado-titulo">
+            <!-- ========== SEMANA 1 ========== -->
+            <div class="periodo-acumulado-titulo semana-1-titulo">
                 <i class="fas fa-chart-pie"></i>
                 <span>ACUMULADO DA SEMANA 1 (${periodo1})</span>
             </div>
@@ -877,10 +856,11 @@ class Comparativo {
             </div>
             
             <div class="periodo-tabela-container tabela-transposta-container">
-                ${tabelaTransposta}
+                ${tabelaTransposta1}
             </div>
 
-            <div class="periodo-acumulado-titulo">
+            <!-- ========== SEMANA 2 ========== -->
+            <div class="periodo-acumulado-titulo semana-2-titulo">
                 <i class="fas fa-chart-pie"></i>
                 <span>ACUMULADO DA SEMANA 2 (${periodo2})</span>
             </div>
@@ -944,7 +924,7 @@ class Comparativo {
             </div>
             
             <div class="periodo-tabela-container tabela-transposta-container">
-                ${tabelaTransposta}
+                ${tabelaTransposta2}
             </div>
         `;
         
