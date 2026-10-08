@@ -67,14 +67,20 @@
             </div>
             
             <div class="filters-grid">
-                <div class="filter-group">
-                    <label for="filterData" class="filter-label">
+                <div class="filter-group filter-group-periodo">
+                    <label class="filter-label">
                         <i class="fas fa-calendar"></i>
-                        Data
+                        Período
                     </label>
-                    <select id="filterData" class="filter-select">
-                        <option value="">Todas as Datas</option>
-                    </select>
+                    <div class="filter-periodo">
+                        <select id="filterDataDe" class="filter-select filter-select-small">
+                            <option value="">De</option>
+                        </select>
+                        <span class="filter-periodo-sep">até</span>
+                        <select id="filterDataAte" class="filter-select filter-select-small">
+                            <option value="">Até</option>
+                        </select>
+                    </div>
                 </div>
                 
                 <div class="filter-group">
