@@ -1,0 +1,374 @@
+/* ==========================================
+   COMPONENTS COMPARATIVO - Header, Cards e Títulos
+   ========================================== */
+
+/* ==========================================
+   HEADER GRANDÃO
+   ========================================== */
+
+.comparativo-header-grande {
+    text-align: center;
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    background: linear-gradient(135deg, var(--primary-color), #34495e);
+    border-radius: var(--border-radius);
+    color: var(--text-light);
+}
+
+.comparativo-header-grande-icon {
+    font-size: 36px;
+    margin-bottom: var(--spacing-sm);
+    color: var(--secondary-color);
+}
+
+.comparativo-header-grande-title {
+    font-size: var(--font-size-xxl);
+    font-weight: 700;
+    margin: 0 0 var(--spacing-sm) 0;
+    letter-spacing: 1px;
+}
+
+.comparativo-header-grande-title span {
+    color: #5dade2;
+}
+
+.comparativo-header-grande-title .vs {
+    color: #f1c40f;
+    font-weight: 700;
+    margin: 0 8px;
+}
+
+.comparativo-header-grande-total {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: 8px 24px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 30px;
+    font-size: var(--font-size-md);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.comparativo-header-grande-total i {
+    font-size: var(--font-size-md);
+    color: #f1c40f;
+}
+
+.comparativo-header-grande-total strong {
+    color: #f1c40f;
+    font-size: var(--font-size-lg);
+}
+
+/* Header do período */
+.comparativo-header-periodo {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: 8px 20px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 30px;
+    font-size: var(--font-size-md);
+    font-weight: 700;
+    margin-bottom: var(--spacing-sm);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.comparativo-header-periodo i {
+    color: #f1c40f;
+    font-size: var(--font-size-md);
+}
+
+.comparativo-header-periodo .semana-tag {
+    font-size: var(--font-size-xs);
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 12px;
+    letter-spacing: 0.5px;
+}
+
+.comparativo-header-periodo .semana-tag.semana-1 {
+    background-color: #3498db;
+    color: #fff;
+}
+
+.comparativo-header-periodo .semana-tag.semana-2 {
+    background-color: #9b59b6;
+    color: #fff;
+}
+
+/* ==========================================
+   GRID DE CARDS GRANDES (4 COLUNAS)
+   ========================================== */
+
+.comparativo-grid-grande {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-md);
+}
+
+.comparativo-card-grande {
+    background-color: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-lg);
+    box-shadow: var(--box-shadow);
+    border-left: 6px solid var(--border-color);
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.comparativo-card-grande:hover {
+    box-shadow: var(--box-shadow-lg);
+    transform: translateY(-4px);
+}
+
+.comparativo-card-grande.bom {
+    border-left-color: var(--success-color);
+    background: linear-gradient(135deg, var(--bg-secondary), rgba(39, 174, 96, 0.05));
+}
+
+.comparativo-card-grande.ruim {
+    border-left-color: var(--danger-color);
+    background: linear-gradient(135deg, var(--bg-secondary), rgba(231, 76, 60, 0.05));
+}
+
+.comparativo-card-grande.neutro {
+    border-left-color: var(--info-color);
+    background: linear-gradient(135deg, var(--bg-secondary), rgba(52, 152, 219, 0.05));
+}
+
+.comparativo-card-grande-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.comparativo-card-grande-icon {
+    font-size: var(--font-size-xl);
+}
+
+.comparativo-card-grande.bom .comparativo-card-grande-icon { color: var(--success-color); }
+.comparativo-card-grande.ruim .comparativo-card-grande-icon { color: var(--danger-color); }
+.comparativo-card-grande.neutro .comparativo-card-grande-icon { color: var(--info-color); }
+
+.comparativo-card-grande-label {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.comparativo-card-grande-body {
+    display: flex;
+    align-items: baseline;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) 0;
+}
+
+.comparativo-card-grande-number {
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.comparativo-card-grande-percent {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+/* ==========================================
+   FOOTER DO CARD - DESTAQUE DO INDICADOR
+   ========================================== */
+
+.comparativo-card-grande-footer {
+    padding-top: var(--spacing-md);
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    border-top: 2px solid var(--border-color);
+}
+
+.comparativo-card-grande-footer .diff-icon {
+    font-size: 32px;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.comparativo-card-grande-footer .diff-big {
+    font-size: var(--font-size-md);
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.comparativo-card-grande-footer .diff-big strong {
+    font-size: var(--font-size-lg);
+    font-weight: 800;
+}
+
+.comparativo-card-grande-footer .diff-label {
+    display: none;
+}
+
+.comparativo-card-grande-footer.bom {
+    background: linear-gradient(180deg, transparent, rgba(39, 174, 96, 0.08));
+}
+
+.comparativo-card-grande-footer.bom .diff-big strong {
+    color: var(--success-color);
+}
+
+.comparativo-card-grande-footer.ruim {
+    background: linear-gradient(180deg, transparent, rgba(231, 76, 60, 0.08));
+}
+
+.comparativo-card-grande-footer.ruim .diff-big strong {
+    color: var(--danger-color);
+}
+
+.comparativo-card-grande-footer.neutro {
+    background: linear-gradient(180deg, transparent, rgba(52, 152, 219, 0.08));
+}
+
+.comparativo-card-grande-footer.neutro .diff-big strong {
+    color: var(--info-color);
+}
+
+/* ==========================================
+   TÍTULOS DAS SEÇÕES
+   ========================================== */
+
+.periodo-acumulado-titulo,
+.periodo-tabela-titulo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    margin: var(--spacing-lg) 0 var(--spacing-md) 0;
+    background: linear-gradient(90deg, transparent, var(--bg-primary), transparent);
+    font-size: var(--font-size-md);
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.periodo-acumulado-titulo i,
+.periodo-tabela-titulo i {
+    color: var(--secondary-color);
+    font-size: var(--font-size-lg);
+}
+
+/* Títulos coloridos das semanas */
+.periodo-acumulado-titulo.semana-1-titulo {
+    color: #2980b9;
+    border-left: 4px solid #3498db;
+    border-right: 4px solid #3498db;
+}
+
+.periodo-acumulado-titulo.semana-2-titulo {
+    color: #8e44ad;
+    border-left: 4px solid #9b59b6;
+    border-right: 4px solid #9b59b6;
+}
+
+/* ==========================================
+   RESPONSIVO
+   ========================================== */
+
+@media (max-width: 1200px) {
+    .comparativo-grid-grande {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .comparativo-grid-grande {
+        grid-template-columns: 1fr;
+    }
+    
+    .comparativo-card-grande {
+        padding: var(--spacing-md);
+    }
+    
+    .comparativo-card-grande-number {
+        font-size: 36px;
+    }
+    
+    .comparativo-header-grande-title {
+        font-size: var(--font-size-lg);
+    }
+    
+    .comparativo-header-grande-total {
+        font-size: var(--font-size-sm);
+        padding: 6px 16px;
+    }
+    
+    .comparativo-header-grande-total strong {
+        font-size: var(--font-size-md);
+    }
+    
+    .comparativo-header-periodo {
+        font-size: var(--font-size-sm);
+        padding: 6px 14px;
+        gap: var(--spacing-sm);
+        flex-direction: column;
+    }
+    
+    .comparativo-header-periodo i {
+        transform: rotate(90deg);
+    }
+    
+    .periodo-acumulado-titulo,
+    .periodo-tabela-titulo {
+        font-size: var(--font-size-sm);
+        letter-spacing: 0.5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .comparativo-card-grande-number {
+        font-size: 28px;
+    }
+    
+    .comparativo-card-grande-percent {
+        font-size: var(--font-size-md);
+    }
+    
+    .comparativo-header-grande {
+        padding: var(--spacing-md);
+    }
+    
+    .comparativo-header-grande-title {
+        font-size: var(--font-size-md);
+    }
+    
+    .comparativo-header-grande-icon {
+        font-size: 24px;
+    }
+    
+    .comparativo-header-periodo {
+        font-size: var(--font-size-xs);
+    }
+    
+    .comparativo-card-grande-footer .diff-icon {
+        font-size: 26px;
+    }
+    
+    .comparativo-card-grande-footer .diff-big {
+        font-size: var(--font-size-sm);
+    }
+    
+    .comparativo-card-grande-footer .diff-big strong {
+        font-size: var(--font-size-md);
+    }
+}
