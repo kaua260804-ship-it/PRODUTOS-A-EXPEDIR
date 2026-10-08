@@ -392,19 +392,29 @@
                 
                 <!-- Selectores de Semana (tipo semana) -->
                 <div class="comparativo-selectors-semana" id="comparativoSelectorsSemana" style="display: none;">
-                    <div class="comparativo-selector">
-                        <label for="semana1Inicio">Início da Semana 1:</label>
-                        <select id="semana1Inicio" class="filter-select">
-                            <option value="">Selecione o início da semana 1</option>
-                        </select>
-                        <small class="comparativo-hint">O sistema pega 7 dias a partir desta data</small>
+                    <div class="comparativo-selector-semana">
+                        <label class="comparativo-semana-label">Semana 1</label>
+                        <div class="filter-periodo">
+                            <select id="semana1De" class="filter-select filter-select-small">
+                                <option value="">De</option>
+                            </select>
+                            <span class="filter-periodo-sep">até</span>
+                            <select id="semana1Ate" class="filter-select filter-select-small">
+                                <option value="">Até</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="comparativo-selector">
-                        <label for="semana2Inicio">Início da Semana 2:</label>
-                        <select id="semana2Inicio" class="filter-select">
-                            <option value="">Selecione o início da semana 2</option>
-                        </select>
-                        <small class="comparativo-hint">O sistema pega 7 dias a partir desta data</small>
+                    <div class="comparativo-selector-semana">
+                        <label class="comparativo-semana-label">Semana 2</label>
+                        <div class="filter-periodo">
+                            <select id="semana2De" class="filter-select filter-select-small">
+                                <option value="">De</option>
+                            </select>
+                            <span class="filter-periodo-sep">até</span>
+                            <select id="semana2Ate" class="filter-select filter-select-small">
+                                <option value="">Até</option>
+                            </select>
+                        </div>
                     </div>
                     <button class="btn btn-primary" id="btnGerarSemana">
                         <i class="fas fa-calculator"></i>
