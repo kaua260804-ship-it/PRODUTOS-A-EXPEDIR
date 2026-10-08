@@ -1221,4 +1221,117 @@ class Comparativo {
             : this.formatMesDisplay(dataComparacao);
         
         const diffCortados = statsBase.percentualCortados - statsComparacao.percentualCortados;
-        const diffAbertos = statsBase.percentualAbertos - statsComparacao
+        const diffAbertos = statsBase.percentualAbertos - statsComparacao.percentualAbertos;
+        const diffAtendidos = statsBase.percentualAtendidos - statsComparacao.percentualAtendidos;
+        
+        const indCortados = this.determinarIndicador(diffCortados, false);
+        const indAbertos = this.determinarIndicador(diffAbertos, false);
+        const indAtendidos = this.determinarIndicador(diffAtendidos, true);
+        
+        container.innerHTML = `
+            <div class="comparativo-header-grande">
+                <div class="comparativo-header-grande-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h2 class="comparativo-header-grande-title">
+                    COMPARATIVO <span>${periodoBase}</span> <span class="vs">VS</span> <span>${periodoComparacao}</span>
+                </h2>
+                <div class="comparativo-header-grande-total">
+                    <i class="fas fa-boxes"></i>
+                    <span>TOTAL DE ITENS PEDIDOS: <strong>${statsBase.totalItens.toLocaleString('pt-BR')}</strong></span>
+                </div>
+            </div>
+
+            <div class="comparativo-grid-grande">
+                <div class="comparativo-card-grande ${indCortados.tipo}">
+                    <div class="comparativo-card-grande-header">
+                        <div class="comparativo-card-grande-icon">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="comparativo-card-grande-label">ITENS CORTADOS</div>
+                    </div>
+                    <div class="comparativo-card-grande-body">
+                        <div class="comparativo-card-grande-number">
+                            ${statsBase.itensCortados.toLocaleString('pt-BR')}
+                        </div>
+                        <div class="comparativo-card-grande-percent">
+                            ${statsBase.percentualCortados.toFixed(1)}%
+                        </div>
+                    </div>
+                    <div class="comparativo-card-grande-footer ${indCortados.tipo}">
+                        <span class="diff-icon">${indCortados.icone}</span>
+                        <span><strong>${indCortados.texto}</strong> de ${Math.abs(diffCortados).toFixed(1)}%</span>
+                        <span class="diff-label">em relação ao período anterior</span>
+                    </div>
+                </div>
+
+                <div class="comparativo-card-grande ${indAbertos.tipo}">
+                    <div class="comparativo-card-grande-header">
+                        <div class="comparativo-card-grande-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="comparativo-card-grande-label">ITENS EM ABERTO</div>
+                    </div>
+                    <div class="comparativo-card-grande-body">
+                        <div class="comparativo-card-grande-number">
+                            ${statsBase.itensAbertos.toLocaleString('pt-BR')}
+                        </div>
+                        <div class="comparativo-card-grande-percent">
+                            ${statsBase.percentualAbertos.toFixed(1)}%
+                        </div>
+                    </div>
+                    <div class="comparativo-card-grande-footer ${indAbertos.tipo}">
+                        <span class="diff-icon">${indAbertos.icone}</span>
+                        <span><strong>${indAbertos.texto}</strong> de ${Math.abs(diffAbertos).toFixed(1)}%</span>
+                        <span class="diff-label">em relação ao período anterior</span>
+                    </div>
+                </div>
+
+                <div class="comparativo-card-grande ${indAtendidos.tipo}">
+                    <div class="comparativo-card-grande-header">
+                        <div class="comparativo-card-grande-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="comparativo-card-grande-label">ITENS ATENDIDOS</div>
+                    </div>
+                    <div class="comparativo-card-grande-body">
+                        <div class="comparativo-card-grande-number">
+                            ${statsBase.itensAtendidos.toLocaleString('pt-BR')}
+                        </div>
+                        <div class="comparativo-card-grande-percent">
+                            ${statsBase.percentualAtendidos.toFixed(1)}%
+                        </div>
+                    </div>
+                    <div class="comparativo-card-grande-footer ${indAtendidos.tipo}">
+                        <span class="diff-icon">${indAtendidos.icone}</span>
+                        <span><strong>${indAtendidos.texto}</strong> de ${Math.abs(diffAtendidos).toFixed(1)}%</span>
+                        <span class="diff-label">em relação ao período anterior</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    determinarIndicador(diferenca, aumentoEhBom) {
+        if (diferenca > 0) {
+            if (aumentoEhBom) {
+                return { texto: 'AUMENTO', tipo: 'bom', icone: '📈' };
+            } else {
+                return { texto: 'AUMENTO', tipo: 'ruim', icone: '📈' };
+            }
+        } else if (diferenca < 0) {
+            if (aumentoEhBom) {
+                return { texto: 'REDUÇÃO', tipo: 'ruim', icone: '📉' };
+            } else {
+                return { texto: 'REDUÇÃO', tipo: 'bom', icone: '📉' };
+            }
+        } else {
+            return { texto: 'MANUTENÇÃO', tipo: 'neutro', icone: '➡️' };
+        }
+    }
+}
+
+// Exportar classe
+window.Comparativo = Comparativo;
