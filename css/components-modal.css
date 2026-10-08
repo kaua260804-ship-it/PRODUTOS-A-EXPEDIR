@@ -30,9 +30,9 @@
     background-color: var(--bg-secondary);
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow-lg);
-    width: 95%;
-    max-width: 1000px;
-    max-height: 90vh;
+    width: 98%;
+    max-width: 1400px;
+    max-height: 95vh;
     overflow-y: auto;
     animation: slideIn 0.3s ease;
     z-index: 1;
@@ -211,7 +211,7 @@
     font-size: var(--font-size-md);
 }
 
-/* Selectores de período (novo tipo) */
+/* Selectores de período (tipo período) */
 .comparativo-selectors-periodo {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -284,6 +284,103 @@
     font-size: var(--font-size-md);
 }
 
+/* ==========================================
+   COMPARATIVO POR SEMANA (2 períodos De/Até)
+   ========================================== */
+
+.comparativo-selectors-semana {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+    align-items: end;
+    margin-bottom: var(--spacing-md);
+}
+
+.comparativo-selector-semana {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-md);
+    background-color: var(--bg-primary);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+.comparativo-semana-label {
+    font-weight: 700;
+    font-size: var(--font-size-md);
+    color: var(--text-primary);
+    text-align: center;
+    margin-bottom: var(--spacing-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.comparativo-selector-semana .filter-periodo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+}
+
+.comparativo-selector-semana .filter-select-small {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 6px;
+    font-size: var(--font-size-sm);
+    text-align: center;
+}
+
+.comparativo-selector-semana .filter-periodo-sep {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: lowercase;
+    white-space: nowrap;
+    padding: 0 2px;
+}
+
+#btnGerarSemana {
+    grid-column: 1 / -1;
+    padding: 14px 28px;
+    font-size: var(--font-size-md);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+    color: var(--text-light);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--box-shadow);
+    white-space: nowrap;
+    width: 100%;
+}
+
+#btnGerarSemana:hover {
+    box-shadow: var(--box-shadow-lg);
+    transform: translateY(-2px);
+}
+
+#btnGerarSemana:active {
+    transform: translateY(0);
+    box-shadow: var(--box-shadow);
+}
+
+#btnGerarSemana i {
+    font-size: var(--font-size-md);
+}
+
+.comparativo-hint {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    text-align: center;
+    font-style: italic;
+    margin-top: 2px;
+}
+
 /* Filtros do comparativo */
 .comparativo-filtros {
     margin-bottom: var(--spacing-lg);
@@ -295,7 +392,7 @@
 .comparativo-filtros .filters-grid {
     margin-bottom: 0;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: var(--spacing-md);
 }
 
@@ -401,15 +498,35 @@
     padding: 8px 20px;
     background-color: rgba(255, 255, 255, 0.1);
     border-radius: 30px;
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-md);
     font-weight: 700;
     margin-bottom: var(--spacing-sm);
     border: 1px solid rgba(255, 255, 255, 0.2);
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .comparativo-header-periodo i {
     color: #f1c40f;
     font-size: var(--font-size-md);
+}
+
+.comparativo-header-periodo .semana-tag {
+    font-size: var(--font-size-xs);
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 12px;
+    letter-spacing: 0.5px;
+}
+
+.comparativo-header-periodo .semana-tag.semana-1 {
+    background-color: #3498db;
+    color: #fff;
+}
+
+.comparativo-header-periodo .semana-tag.semana-2 {
+    background-color: #9b59b6;
+    color: #fff;
 }
 
 /* ==========================================
@@ -455,7 +572,6 @@
     background: linear-gradient(135deg, var(--bg-secondary), rgba(52, 152, 219, 0.05));
 }
 
-/* Header do card */
 .comparativo-card-grande-header {
     display: flex;
     align-items: center;
@@ -486,7 +602,6 @@
     letter-spacing: 1px;
 }
 
-/* Body do card */
 .comparativo-card-grande-body {
     display: flex;
     align-items: baseline;
@@ -507,7 +622,6 @@
     color: var(--text-secondary);
 }
 
-/* Footer do card */
 .comparativo-card-grande-footer {
     display: flex;
     align-items: center;
@@ -541,10 +655,9 @@
 }
 
 /* ==========================================
-   NOVO TIPO: POR PERÍODO
+   TÍTULOS DAS SEÇÕES
    ========================================== */
 
-/* Títulos das seções */
 .periodo-acumulado-titulo,
 .periodo-tabela-titulo {
     display: flex;
@@ -567,7 +680,10 @@
     font-size: var(--font-size-lg);
 }
 
-/* Tabela do período */
+/* ==========================================
+   TABELA POR PERÍODO
+   ========================================== */
+
 .periodo-tabela-container {
     background-color: var(--bg-secondary);
     border-radius: var(--border-radius);
@@ -637,4 +753,372 @@
 .periodo-tabela .tabela-pct {
     display: block;
     font-size: var(--font-size-xs);
-    font-weight: 500
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+.periodo-tabela .tabela-aberto {
+    color: var(--warning-color);
+}
+
+.periodo-tabela .tabela-corte {
+    color: var(--danger-color);
+}
+
+.periodo-tabela .tabela-expedido {
+    color: var(--success-color);
+}
+
+/* ==========================================
+   TABELA TRANSPOSTA (SEMANAS)
+   ========================================== */
+
+.tabela-transposta-container {
+    overflow-x: auto;
+}
+
+.tabela-transposta {
+    min-width: 100%;
+    table-layout: auto;
+}
+
+.tabela-transposta th,
+.tabela-transposta td {
+    padding: 10px 12px;
+    white-space: nowrap;
+}
+
+.tabela-transposta .col-metrica {
+    position: sticky;
+    left: 0;
+    background: linear-gradient(135deg, #34495e, var(--primary-color));
+    color: var(--text-light) !important;
+    font-weight: 700;
+    text-align: left;
+    z-index: 5;
+    min-width: 220px;
+    border-right: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+.tabela-transposta tbody .col-metrica {
+    background: var(--primary-color);
+    color: var(--text-light) !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: var(--font-size-xs);
+    letter-spacing: 0.5px;
+    padding-left: var(--spacing-md);
+}
+
+.tabela-transposta .col-data {
+    min-width: 130px;
+    text-align: center;
+}
+
+.tabela-transposta tbody td.col-data {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.tabela-transposta tbody td.semana1 {
+    background-color: rgba(52, 152, 219, 0.04);
+}
+
+.tabela-transposta tbody td.semana2 {
+    background-color: rgba(155, 89, 182, 0.04);
+}
+
+.tabela-transposta .duplo-valor {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: var(--font-size-xs);
+}
+
+.tabela-transposta .duplo-sep {
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+/* Loading overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loading-content {
+    background-color: var(--bg-secondary);
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius);
+    text-align: center;
+    box-shadow: var(--box-shadow-lg);
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--bg-primary);
+    border-radius: 50%;
+    border-top-color: var(--secondary-color);
+    animation: spin 0.6s linear infinite;
+    margin-bottom: var(--spacing-md);
+}
+
+/* Animação de entrada do modal */
+@keyframes modalIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes overlayIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal .modal-content {
+    animation: modalIn 0.3s ease-out;
+}
+
+.modal .modal-overlay {
+    animation: overlayIn 0.3s ease-out;
+}
+
+/* ==========================================
+   RESPONSIVO
+   ========================================== */
+
+@media (max-width: 1200px) {
+    .comparativo-filtros .filters-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .comparativo-grid-grande {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .comparativo-tipo-btn {
+        min-width: 150px;
+        font-size: var(--font-size-xs);
+        padding: 8px 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .modal-content {
+        width: 100%;
+        max-height: 95vh;
+        margin: 5px;
+    }
+    
+    .modal-header {
+        padding: var(--spacing-sm);
+    }
+    
+    .modal-body {
+        padding: var(--spacing-sm);
+    }
+    
+    .comparativo-selectors,
+    .comparativo-selectors-periodo,
+    .comparativo-selectors-semana {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
+    
+    .comparativo-tipo {
+        flex-direction: column;
+    }
+    
+    .comparativo-tipo-btn {
+        width: 100%;
+        justify-content: center;
+        min-width: auto;
+    }
+    
+    .comparativo-filtros .filters-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
+    
+    .comparativo-grid-grande {
+        grid-template-columns: 1fr;
+    }
+    
+    .comparativo-card-grande {
+        padding: var(--spacing-md);
+    }
+    
+    .comparativo-card-grande-number {
+        font-size: 36px;
+    }
+    
+    .comparativo-header-grande-title {
+        font-size: var(--font-size-lg);
+    }
+    
+    .comparativo-header-grande-total {
+        font-size: var(--font-size-sm);
+        padding: 6px 16px;
+    }
+    
+    .comparativo-header-grande-total strong {
+        font-size: var(--font-size-md);
+    }
+    
+    .comparativo-header-periodo {
+        font-size: var(--font-size-sm);
+        padding: 6px 14px;
+        gap: var(--spacing-sm);
+        flex-direction: column;
+    }
+    
+    .comparativo-header-periodo i {
+        transform: rotate(90deg);
+    }
+    
+    .periodo-tabela-container {
+        overflow-x: auto;
+    }
+    
+    .periodo-tabela {
+        min-width: 600px;
+    }
+    
+    .periodo-tabela th,
+    .periodo-tabela td {
+        padding: 8px 6px;
+        font-size: var(--font-size-xs);
+    }
+    
+    .periodo-acumulado-titulo,
+    .periodo-tabela-titulo {
+        font-size: var(--font-size-sm);
+        letter-spacing: 0.5px;
+    }
+    
+    .tabela-transposta .col-metrica {
+        min-width: 160px;
+        font-size: 10px;
+    }
+    
+    .tabela-transposta th.col-data,
+    .tabela-transposta td.col-data {
+        min-width: 100px;
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-content {
+        width: 100%;
+        max-height: 100vh;
+        margin: 0;
+        border-radius: 0;
+    }
+    
+    .modal-header {
+        padding: var(--spacing-xs);
+    }
+    
+    .modal-title {
+        font-size: var(--font-size-sm);
+    }
+    
+    .modal-body {
+        padding: var(--spacing-xs);
+    }
+    
+    .comparativo-tipo-btn {
+        padding: 6px 10px;
+        font-size: var(--font-size-xs);
+    }
+    
+    .comparativo-card-grande-number {
+        font-size: 28px;
+    }
+    
+    .comparativo-card-grande-percent {
+        font-size: var(--font-size-md);
+    }
+    
+    .comparativo-header-grande {
+        padding: var(--spacing-md);
+    }
+    
+    .comparativo-header-grande-title {
+        font-size: var(--font-size-md);
+    }
+    
+    .comparativo-header-grande-icon {
+        font-size: 24px;
+    }
+    
+    .comparativo-header-periodo {
+        font-size: var(--font-size-xs);
+    }
+    
+    .periodo-tabela th,
+    .periodo-tabela td {
+        padding: 6px 4px;
+        font-size: 10px;
+    }
+    
+    .periodo-tabela .tabela-pct {
+        font-size: 9px;
+    }
+    
+    .tabela-transposta .col-metrica {
+        min-width: 130px;
+        font-size: 9px;
+        padding: 6px 8px;
+    }
+    
+    .tabela-transposta th.col-data,
+    .tabela-transposta td.col-data {
+        min-width: 80px;
+        font-size: 9px;
+        padding: 6px 4px;
+    }
+}
+
+/* Scrollbar personalizada para o modal */
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+    border-radius: 3px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: var(--text-muted);
+    border-radius: 3px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
