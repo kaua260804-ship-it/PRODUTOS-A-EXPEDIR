@@ -1,0 +1,99 @@
+/* ==========================================
+   COMPONENTS CHARTS - Gráficos de Barras
+   ========================================== */
+
+/* Grid de gráficos (2 colunas) */
+.graficos-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.grafico-card {
+    background-color: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: var(--spacing-md);
+    border: 1px solid var(--border-color);
+    transition: var(--transition);
+}
+
+.grafico-card:hover {
+    box-shadow: var(--box-shadow-lg);
+}
+
+.grafico-card-solo {
+    width: 100%;
+    margin-bottom: var(--spacing-lg);
+}
+
+.grafico-card-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: var(--spacing-md);
+}
+
+.grafico-card-header i {
+    font-size: var(--font-size-md);
+}
+
+.grafico-icon-corte { color: var(--danger-color); }
+.grafico-icon-aberto { color: var(--warning-color); }
+.grafico-icon-atendido { color: var(--success-color); }
+.grafico-icon-pedidos { color: var(--secondary-color); }
+
+/* Wrapper do canvas */
+.grafico-canvas-wrapper {
+    position: relative;
+    height: 280px;
+    width: 100%;
+}
+
+.grafico-canvas-grande {
+    height: 360px;
+}
+
+/* ==========================================
+   RESPONSIVO
+   ========================================== */
+
+@media (max-width: 992px) {
+    .graficos-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .grafico-canvas-wrapper {
+        height: 240px;
+    }
+    
+    .grafico-canvas-grande {
+        height: 300px;
+    }
+}
+
+@media (max-width: 480px) {
+    .grafico-card {
+        padding: var(--spacing-sm);
+    }
+    
+    .grafico-card-header {
+        font-size: var(--font-size-xs);
+    }
+    
+    .grafico-canvas-wrapper {
+        height: 220px;
+    }
+    
+    .grafico-canvas-grande {
+        height: 260px;
+    }
+}
