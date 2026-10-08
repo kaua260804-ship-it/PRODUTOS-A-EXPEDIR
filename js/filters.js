@@ -6,7 +6,8 @@ class Filters {
     constructor(dataProcessor) {
         this.dataProcessor = dataProcessor;
         this.filters = {
-            data: '',
+            dataDe: '',
+            dataAte: '',
             empresa: '',
             pedido: '',
             codigo: '',
@@ -23,8 +24,13 @@ class Filters {
     }
 
     initializeEventListeners() {
-        document.getElementById('filterData').addEventListener('change', (e) => {
-            this.filters.data = e.target.value;
+        document.getElementById('filterDataDe').addEventListener('change', (e) => {
+            this.filters.dataDe = e.target.value;
+            this.applyFilters();
+        });
+        
+        document.getElementById('filterDataAte').addEventListener('change', (e) => {
+            this.filters.dataAte = e.target.value;
             this.applyFilters();
         });
         
@@ -71,7 +77,6 @@ class Filters {
             this.applyFilters();
         });
         
-        // Novo filtro: TIPO
         const filterTipoEl = document.getElementById('filterTipo');
         if (filterTipoEl) {
             filterTipoEl.addEventListener('change', (e) => {
@@ -86,8 +91,10 @@ class Filters {
     }
 
     populateFilterOptions() {
+        // Popular as duas listas de data (De e Até) com as mesmas opções
         const datas = this.dataProcessor.getUniqueValues('DATA');
-        this.populateSelect('filterData', datas, true);
+        this.populateSelect('filterDataDe', datas, true);
+        this.populateSelect('filterDataAte', datas, true);
         
         const empresas = this.dataProcessor.getUniqueValues('EMPRESA');
         this.populateSelect('filterEmpresa', empresas);
@@ -101,7 +108,6 @@ class Filters {
         const subgrupos = this.dataProcessor.getUniqueValues('SUBGRUPO');
         this.populateSelect('filterSubgrupo', subgrupos);
         
-        // Novo: Tipos
         const tipos = this.dataProcessor.getUniqueTipos();
         this.populateSelect('filterTipo', tipos);
     }
@@ -178,9 +184,54 @@ class Filters {
         }
     }
 
+    /**
+     * Verifica se uma linha está dentro do período De/Até
+     */
+    estaDentroDoPeriodo(row) {
+        if (!this.filters.dataDe && !this.filters.dataAte) {
+            return true;
+        }
+        
+        const dataRow = this.dataProcessor.parseDate(row['DATA']);
+        if (!dataRow) return false;
+        
+        if (this.filters.dataDe) {
+            const dataDe = this.dataProcessor.parseDate(this.filters.dataDe);
+            if (dataDe && dataRow < dataDe) {
+                return false;
+            }
+        }
+        
+        if (this.filters.dataAte) {
+            const dataAte = this.dataProcessor.parseDate(this.filters.dataAte);
+            if (dataAte && dataRow > dataAte) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
     applyFilters() {
+        // Validar coerência do período
+        if (this.filters.dataDe && this.filters.dataAte) {
+            const dataDe = this.dataProcessor.parseDate(this.filters.dataDe);
+            const dataAte = this.dataProcessor.parseDate(this.filters.dataAte);
+            
+            if (dataDe && dataAte && dataDe > dataAte) {
+                // Inverter automaticamente
+                const temp = this.filters.dataDe;
+                this.filters.dataDe = this.filters.dataAte;
+                this.filters.dataAte = temp;
+                
+                document.getElementById('filterDataDe').value = this.filters.dataDe;
+                document.getElementById('filterDataAte').value = this.filters.dataAte;
+            }
+        }
+        
         this.filteredData = this.dataProcessor.processedData.filter(row => {
-            if (this.filters.data && row['DATA']?.toString() !== this.filters.data) {
+            // Filtro de período (De / Até)
+            if (!this.estaDentroDoPeriodo(row)) {
                 return false;
             }
             
@@ -216,7 +267,6 @@ class Filters {
                 return false;
             }
             
-            // Novo filtro por TIPO
             if (this.filters.tipo && row['TIPO']?.toString().trim() !== this.filters.tipo.trim()) {
                 return false;
             }
@@ -231,7 +281,8 @@ class Filters {
 
     clearFilters() {
         this.filters = {
-            data: '',
+            dataDe: '',
+            dataAte: '',
             empresa: '',
             pedido: '',
             codigo: '',
@@ -243,7 +294,8 @@ class Filters {
             tipo: ''
         };
         
-        document.getElementById('filterData').value = '';
+        document.getElementById('filterDataDe').value = '';
+        document.getElementById('filterDataAte').value = '';
         document.getElementById('filterEmpresa').value = '';
         document.getElementById('filterPedido').value = '';
         document.getElementById('filterCodigo').value = '';
