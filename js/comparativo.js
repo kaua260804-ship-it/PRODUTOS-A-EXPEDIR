@@ -1,5 +1,9 @@
 /**
- * Gerencia o comparativo entre datas ou meses
+ * Comparativo - Orquestrador + Comparação Dia/Mês
+ * 
+ * Depende de:
+ *  - js/comparativoCharts.js (gráficos)
+ *  - js/comparativoPeriodo.js (período e semana)
  */
 
 class Comparativo {
@@ -12,33 +16,24 @@ class Comparativo {
             subgrupo: '',
             tipo: ''
         };
+        
+        this.charts = new ComparativoCharts();
+        this.periodo = new ComparativoPeriodo(this);
+        
         this.initializeEventListeners();
     }
 
+    // ============================================================
+    // EVENT LISTENERS
+    // ============================================================
+
     initializeEventListeners() {
-        document.getElementById('btnResumo').addEventListener('click', () => {
-            this.openModal();
-        });
-        
-        document.getElementById('btnCloseModal').addEventListener('click', () => {
-            this.closeModal();
-        });
-        
-        document.getElementById('modalOverlay').addEventListener('click', () => {
-            this.closeModal();
-        });
-        
-        document.getElementById('btnGerarComparativo').addEventListener('click', () => {
-            this.gerarComparativo();
-        });
-        
-        document.getElementById('btnGerarPeriodo').addEventListener('click', () => {
-            this.gerarResumoPeriodo();
-        });
-        
-        document.getElementById('btnGerarSemana').addEventListener('click', () => {
-            this.gerarComparativoSemana();
-        });
+        document.getElementById('btnResumo').addEventListener('click', () => this.openModal());
+        document.getElementById('btnCloseModal').addEventListener('click', () => this.closeModal());
+        document.getElementById('modalOverlay').addEventListener('click', () => this.closeModal());
+        document.getElementById('btnGerarComparativo').addEventListener('click', () => this.gerarComparativo());
+        document.getElementById('btnGerarPeriodo').addEventListener('click', () => this.periodo.gerarResumoPeriodo());
+        document.getElementById('btnGerarSemana').addEventListener('click', () => this.periodo.gerarComparativoSemana());
         
         document.getElementById('btnTipoDia').addEventListener('click', () => {
             this.tipoComparativo = 'dia';
@@ -66,88 +61,51 @@ class Comparativo {
             this.atualizarSelectores();
         });
         
-        document.getElementById('comparativoCategoria').addEventListener('change', (e) => {
-            this.filtrosComparativo.categoria = e.target.value;
-            this.atualizarDatasDisponiveis();
+        ['Categoria', 'Grupo', 'Subgrupo', 'Tipo'].forEach(campo => {
+            const el = document.getElementById(`comparativo${campo}`);
+            if (el) {
+                el.addEventListener('change', (e) => {
+                    this.filtrosComparativo[campo.toLowerCase()] = e.target.value;
+                    this.atualizarDatasDisponiveis();
+                });
+            }
         });
-        
-        document.getElementById('comparativoGrupo').addEventListener('change', (e) => {
-            this.filtrosComparativo.grupo = e.target.value;
-            this.atualizarDatasDisponiveis();
-        });
-        
-        document.getElementById('comparativoSubgrupo').addEventListener('change', (e) => {
-            this.filtrosComparativo.subgrupo = e.target.value;
-            this.atualizarDatasDisponiveis();
-        });
-        
-        const comparativoTipoEl = document.getElementById('comparativoTipo');
-        if (comparativoTipoEl) {
-            comparativoTipoEl.addEventListener('change', (e) => {
-                this.filtrosComparativo.tipo = e.target.value;
-                this.atualizarDatasDisponiveis();
-            });
-        }
     }
 
-    atualizarDatasDisponiveis() {
-        const selectorsComparativo = document.querySelector('.comparativo-selectors');
-        const selectorsPeriodo = document.getElementById('comparativoSelectorsPeriodo');
-        const selectorsSemana = document.getElementById('comparativoSelectorsSemana');
-        
-        if (this.tipoComparativo === 'periodo') {
-            if (selectorsPeriodo && selectorsPeriodo.style.display !== 'none') {
-                this.popularDatasPeriodo();
-            }
-        } else if (this.tipoComparativo === 'semana') {
-            if (selectorsSemana && selectorsSemana.style.display !== 'none') {
-                this.popularDatasSemana();
-            }
-        } else {
-            if (selectorsComparativo && selectorsComparativo.style.display !== 'none') {
-                if (this.tipoComparativo === 'dia') {
-                    this.popularDatas();
-                } else {
-                    this.popularMeses();
-                }
-            }
-        }
-    }
-
-    atualizarBotoesTipo(btnAtivoId) {
-        ['btnTipoDia', 'btnTipoMes', 'btnTipoPeriodo', 'btnTipoSemana'].forEach(id => {
-            const btn = document.getElementById(id);
-            if (btn) {
-                if (id === btnAtivoId) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            }
-        });
-    }
+    // ============================================================
+    // MODAL
+    // ============================================================
 
     openModal() {
         const modal = document.getElementById('comparativoModal');
         modal.style.display = 'flex';
         
-        this.filtrosComparativo = {
-            categoria: '',
-            grupo: '',
-            subgrupo: '',
-            tipo: ''
-        };
+        this.filtrosComparativo = { categoria: '', grupo: '', subgrupo: '', tipo: '' };
         
         this.popularFiltrosComparativo();
         this.atualizarSelectores();
+        
+        // Destruir gráficos antigos
+        this.charts.destruirTodos();
         
         document.getElementById('comparativoResultado').style.display = 'none';
         document.getElementById('comparativoResultado').innerHTML = '';
     }
 
     closeModal() {
-        const modal = document.getElementById('comparativoModal');
-        modal.style.display = 'none';
+        document.getElementById('comparativoModal').style.display = 'none';
+        this.charts.destruirTodos();
+    }
+
+    // ============================================================
+    // SELECTORES
+    // ============================================================
+
+    atualizarBotoesTipo(btnAtivoId) {
+        ['btnTipoDia', 'btnTipoMes', 'btnTipoPeriodo', 'btnTipoSemana'].forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) btn.classList.toggle('active', id === btnAtivoId);
+        });
     }
 
     atualizarLabels() {
@@ -168,20 +126,18 @@ class Comparativo {
         const selectorsPeriodo = document.getElementById('comparativoSelectorsPeriodo');
         const selectorsSemana = document.getElementById('comparativoSelectorsSemana');
         
-        // Esconde todos
         if (selectorsComparativo) selectorsComparativo.style.display = 'none';
         if (selectorsPeriodo) selectorsPeriodo.style.display = 'none';
         if (selectorsSemana) selectorsSemana.style.display = 'none';
         
         if (this.tipoComparativo === 'periodo') {
             if (selectorsPeriodo) selectorsPeriodo.style.display = 'grid';
-            this.popularDatasPeriodo();
+            this.periodo.popularDatasPeriodo();
         } else if (this.tipoComparativo === 'semana') {
             if (selectorsSemana) selectorsSemana.style.display = 'grid';
-            this.popularDatasSemana();
+            this.periodo.popularDatasSemana();
         } else {
             if (selectorsComparativo) selectorsComparativo.style.display = 'grid';
-            
             if (this.tipoComparativo === 'dia') {
                 this.popularDatas();
             } else {
@@ -190,18 +146,26 @@ class Comparativo {
         }
     }
 
+    atualizarDatasDisponiveis() {
+        const selectorsComparativo = document.querySelector('.comparativo-selectors');
+        const selectorsPeriodo = document.getElementById('comparativoSelectorsPeriodo');
+        const selectorsSemana = document.getElementById('comparativoSelectorsSemana');
+        
+        if (this.tipoComparativo === 'periodo' && selectorsPeriodo && selectorsPeriodo.style.display !== 'none') {
+            this.periodo.popularDatasPeriodo();
+        } else if (this.tipoComparativo === 'semana' && selectorsSemana && selectorsSemana.style.display !== 'none') {
+            this.periodo.popularDatasSemana();
+        } else if (selectorsComparativo && selectorsComparativo.style.display !== 'none') {
+            if (this.tipoComparativo === 'dia') this.popularDatas();
+            else this.popularMeses();
+        }
+    }
+
     popularFiltrosComparativo() {
-        const categorias = this.dataProcessor.getUniqueValues('CATEGORIA');
-        this.popularSelect('comparativoCategoria', categorias, 'Todas');
-        
-        const grupos = this.dataProcessor.getUniqueValues('GRUPO');
-        this.popularSelect('comparativoGrupo', grupos, 'Todos');
-        
-        const subgrupos = this.dataProcessor.getUniqueValues('SUBGRUPO');
-        this.popularSelect('comparativoSubgrupo', subgrupos, 'Todos');
-        
-        const tipos = this.dataProcessor.getUniqueTipos();
-        this.popularSelect('comparativoTipo', tipos, 'Todos');
+        this.popularSelect('comparativoCategoria', this.dataProcessor.getUniqueValues('CATEGORIA'), 'Todas');
+        this.popularSelect('comparativoGrupo', this.dataProcessor.getUniqueValues('GRUPO'), 'Todos');
+        this.popularSelect('comparativoSubgrupo', this.dataProcessor.getUniqueValues('SUBGRUPO'), 'Todos');
+        this.popularSelect('comparativoTipo', this.dataProcessor.getUniqueTipos(), 'Todos');
     }
 
     popularSelect(selectId, values, placeholder) {
@@ -209,7 +173,6 @@ class Comparativo {
         if (!select) return;
         
         select.innerHTML = `<option value="">${placeholder}</option>`;
-        
         values.forEach(value => {
             const option = document.createElement('option');
             option.value = value;
@@ -218,217 +181,35 @@ class Comparativo {
         });
     }
 
-    getDadosFiltradosBase() {
-        return this.dataProcessor.processedData.filter(row => {
-            if (this.filtrosComparativo.categoria && 
-                row['CATEGORIA']?.toString() !== this.filtrosComparativo.categoria) {
-                return false;
-            }
-            
-            if (this.filtrosComparativo.grupo && 
-                row['GRUPO']?.toString() !== this.filtrosComparativo.grupo) {
-                return false;
-            }
-            
-            if (this.filtrosComparativo.subgrupo && 
-                row['SUBGRUPO']?.toString() !== this.filtrosComparativo.subgrupo) {
-                return false;
-            }
-            
-            if (this.filtrosComparativo.tipo && 
-                row['TIPO']?.toString().trim() !== this.filtrosComparativo.tipo.trim()) {
-                return false;
-            }
-            
-            return true;
-        });
-    }
-
     popularDatas() {
         const dadosFiltrados = this.getDadosFiltradosBase();
         const datas = new Set();
-        
         dadosFiltrados.forEach(row => {
-            const dataStr = row['DATA']?.toString();
-            if (dataStr && dataStr.trim() !== '') {
-                datas.add(dataStr);
-            }
+            const d = row['DATA']?.toString();
+            if (d && d.trim() !== '') datas.add(d);
         });
         
         const datasArray = Array.from(datas).sort((a, b) => {
             const dateA = this.dataProcessor.parseDate(a);
             const dateB = this.dataProcessor.parseDate(b);
-            if (dateA && dateB) return dateB - dateA;
-            return 0;
+            return (dateA && dateB) ? dateB - dateA : 0;
         });
         
-        const dataBase = document.getElementById('dataBase');
-        const dataComparacao = document.getElementById('dataComparacao');
-        
-        if (!dataBase || !dataComparacao) return;
-        
-        const valorBase = dataBase.value;
-        const valorComparacao = dataComparacao.value;
-        
-        dataBase.innerHTML = '<option value="">Selecione a data base</option>';
-        dataComparacao.innerHTML = '<option value="">Selecione a data de comparação</option>';
-        
-        if (datasArray.length === 0) {
-            const optVazio = document.createElement('option');
-            optVazio.value = '';
-            optVazio.textContent = 'Nenhuma data disponível';
-            optVazio.disabled = true;
-            dataBase.appendChild(optVazio.cloneNode(true));
-            dataComparacao.appendChild(optVazio.cloneNode(true));
-            return;
-        }
-        
-        datasArray.forEach(data => {
-            const optionBase = document.createElement('option');
-            optionBase.value = data;
-            optionBase.textContent = this.dataProcessor.formatDateDisplay(data);
-            dataBase.appendChild(optionBase);
-            
-            const optionComparacao = document.createElement('option');
-            optionComparacao.value = data;
-            optionComparacao.textContent = this.dataProcessor.formatDateDisplay(data);
-            dataComparacao.appendChild(optionComparacao);
-        });
-        
-        if (valorBase && datasArray.includes(valorBase)) dataBase.value = valorBase;
-        if (valorComparacao && datasArray.includes(valorComparacao)) dataComparacao.value = valorComparacao;
-    }
-
-    popularDatasPeriodo() {
-        const dadosFiltrados = this.getDadosFiltradosBase();
-        const datas = new Set();
-        
-        dadosFiltrados.forEach(row => {
-            const dataStr = row['DATA']?.toString();
-            if (dataStr && dataStr.trim() !== '') {
-                datas.add(dataStr);
-            }
-        });
-        
-        const datasArray = Array.from(datas).sort((a, b) => {
-            const dateA = this.dataProcessor.parseDate(a);
-            const dateB = this.dataProcessor.parseDate(b);
-            if (dateA && dateB) return dateB - dateA;
-            return 0;
-        });
-        
-        const dataInicio = document.getElementById('dataInicioPeriodo');
-        const dataFim = document.getElementById('dataFimPeriodo');
-        
-        if (!dataInicio || !dataFim) return;
-        
-        const valorInicio = dataInicio.value;
-        const valorFim = dataFim.value;
-        
-        dataInicio.innerHTML = '<option value="">Selecione a data inicial</option>';
-        dataFim.innerHTML = '<option value="">Selecione a data final</option>';
-        
-        if (datasArray.length === 0) {
-            const optVazio = document.createElement('option');
-            optVazio.value = '';
-            optVazio.textContent = 'Nenhuma data disponível';
-            optVazio.disabled = true;
-            dataInicio.appendChild(optVazio.cloneNode(true));
-            dataFim.appendChild(optVazio.cloneNode(true));
-            return;
-        }
-        
-        datasArray.forEach(data => {
-            const optionInicio = document.createElement('option');
-            optionInicio.value = data;
-            optionInicio.textContent = this.dataProcessor.formatDateDisplay(data);
-            dataInicio.appendChild(optionInicio);
-            
-            const optionFim = document.createElement('option');
-            optionFim.value = data;
-            optionFim.textContent = this.dataProcessor.formatDateDisplay(data);
-            dataFim.appendChild(optionFim);
-        });
-        
-        if (valorInicio && datasArray.includes(valorInicio)) dataInicio.value = valorInicio;
-        if (valorFim && datasArray.includes(valorFim)) dataFim.value = valorFim;
-    }
-
-    /**
-     * Popular datas para o comparativo por SEMANA (com De/Até para cada semana)
-     */
-    popularDatasSemana() {
-        const dadosFiltrados = this.getDadosFiltradosBase();
-        const datas = new Set();
-        
-        dadosFiltrados.forEach(row => {
-            const dataStr = row['DATA']?.toString();
-            if (dataStr && dataStr.trim() !== '') {
-                datas.add(dataStr);
-            }
-        });
-        
-        const datasArray = Array.from(datas).sort((a, b) => {
-            const dateA = this.dataProcessor.parseDate(a);
-            const dateB = this.dataProcessor.parseDate(b);
-            if (dateA && dateB) return dateB - dateA;
-            return 0;
-        });
-        
-        const ids = ['semana1De', 'semana1Ate', 'semana2De', 'semana2Ate'];
-        const valoresAtuais = {};
-        
-        ids.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) valoresAtuais[id] = el.value;
-        });
-        
-        ids.forEach(id => {
-            const el = document.getElementById(id);
-            if (!el) return;
-            
-            const placeholder = el.options[0];
-            el.innerHTML = '';
-            el.appendChild(placeholder);
-            
-            if (datasArray.length === 0) {
-                const optVazio = document.createElement('option');
-                optVazio.value = '';
-                optVazio.textContent = 'Nenhuma data';
-                optVazio.disabled = true;
-                el.appendChild(optVazio);
-                return;
-            }
-            
-            datasArray.forEach(data => {
-                const option = document.createElement('option');
-                option.value = data;
-                option.textContent = this.dataProcessor.formatDateDisplay(data);
-                el.appendChild(option);
-            });
-            
-            if (valoresAtuais[id] && datasArray.includes(valoresAtuais[id])) {
-                el.value = valoresAtuais[id];
-            }
-        });
+        this._popularSelectsDatas(['dataBase', 'dataComparacao'], datasArray, 
+            'Selecione a data base', 'Selecione a data de comparação');
     }
 
     popularMeses() {
         const dadosFiltrados = this.getDadosFiltradosBase();
         const mesesSet = new Set();
-        
         dadosFiltrados.forEach(row => {
             const data = this.dataProcessor.parseDate(row['DATA']);
-            if (data) {
-                mesesSet.add(`${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`);
-            }
+            if (data) mesesSet.add(`${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`);
         });
         
         const meses = Array.from(mesesSet).sort().reverse();
-        
         const dataBase = document.getElementById('dataBase');
         const dataComparacao = document.getElementById('dataComparacao');
-        
         if (!dataBase || !dataComparacao) return;
         
         const valorBase = dataBase.value;
@@ -437,498 +218,86 @@ class Comparativo {
         dataBase.innerHTML = '<option value="">Selecione o mês base</option>';
         dataComparacao.innerHTML = '<option value="">Selecione o mês de comparação</option>';
         
-        if (meses.length === 0) {
-            const optVazio = document.createElement('option');
-            optVazio.value = '';
-            optVazio.textContent = 'Nenhum mês disponível';
-            optVazio.disabled = true;
-            dataBase.appendChild(optVazio.cloneNode(true));
-            dataComparacao.appendChild(optVazio.cloneNode(true));
-            return;
-        }
-        
         meses.forEach(mes => {
-            const optionBase = document.createElement('option');
-            optionBase.value = mes;
-            optionBase.textContent = this.formatMesDisplay(mes);
-            dataBase.appendChild(optionBase);
-            
-            const optionComparacao = document.createElement('option');
-            optionComparacao.value = mes;
-            optionComparacao.textContent = this.formatMesDisplay(mes);
-            dataComparacao.appendChild(optionComparacao);
+            const display = this.formatMesDisplay(mes);
+            [dataBase, dataComparacao].forEach(sel => {
+                const opt = document.createElement('option');
+                opt.value = mes;
+                opt.textContent = display;
+                sel.appendChild(opt);
+            });
         });
         
         if (valorBase && meses.includes(valorBase)) dataBase.value = valorBase;
         if (valorComparacao && meses.includes(valorComparacao)) dataComparacao.value = valorComparacao;
     }
 
-    getMesesDisponiveis() {
-        const meses = new Set();
+    _popularSelectsDatas(ids, datasArray, placeholder1, placeholder2) {
+        const el1 = document.getElementById(ids[0]);
+        const el2 = document.getElementById(ids[1]);
+        if (!el1 || !el2) return;
         
-        this.dataProcessor.processedData.forEach(row => {
-            const data = this.dataProcessor.parseDate(row['DATA']);
-            if (data) {
-                meses.add(`${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`);
-            }
+        const valor1 = el1.value;
+        const valor2 = el2.value;
+        
+        el1.innerHTML = `<option value="">${placeholder1}</option>`;
+        el2.innerHTML = `<option value="">${placeholder2}</option>`;
+        
+        if (datasArray.length === 0) {
+            [el1, el2].forEach(el => {
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = 'Nenhuma data disponível';
+                opt.disabled = true;
+                el.appendChild(opt);
+            });
+            return;
+        }
+        
+        datasArray.forEach(data => {
+            const display = this.dataProcessor.formatDateDisplay(data);
+            [el1, el2].forEach(sel => {
+                const opt = document.createElement('option');
+                opt.value = data;
+                opt.textContent = display;
+                sel.appendChild(opt);
+            });
         });
         
-        return Array.from(meses).sort().reverse();
+        if (valor1 && datasArray.includes(valor1)) el1.value = valor1;
+        if (valor2 && datasArray.includes(valor2)) el2.value = valor2;
     }
 
     formatMesDisplay(mes) {
         const [ano, mesNum] = mes.split('-');
-        const nomesMeses = [
-            'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-        ];
-        return `${nomesMeses[parseInt(mesNum) - 1]} ${ano}`;
+        const nomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                       'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+        return `${nomes[parseInt(mesNum) - 1]} ${ano}`;
     }
 
-    aplicarFiltrosComparativo(dados) {
-        return dados.filter(row => {
-            if (this.filtrosComparativo.categoria && 
-                row['CATEGORIA']?.toString() !== this.filtrosComparativo.categoria) {
-                return false;
-            }
-            
-            if (this.filtrosComparativo.grupo && 
-                row['GRUPO']?.toString() !== this.filtrosComparativo.grupo) {
-                return false;
-            }
-            
-            if (this.filtrosComparativo.subgrupo && 
-                row['SUBGRUPO']?.toString() !== this.filtrosComparativo.subgrupo) {
-                return false;
-            }
-            
-            if (this.filtrosComparativo.tipo && 
-                row['TIPO']?.toString().trim() !== this.filtrosComparativo.tipo.trim()) {
-                return false;
-            }
-            
+    // ============================================================
+    // FILTROS
+    // ============================================================
+
+    getDadosFiltradosBase() {
+        return this.dataProcessor.processedData.filter(row => {
+            if (this.filtrosComparativo.categoria && row['CATEGORIA']?.toString() !== this.filtrosComparativo.categoria) return false;
+            if (this.filtrosComparativo.grupo && row['GRUPO']?.toString() !== this.filtrosComparativo.grupo) return false;
+            if (this.filtrosComparativo.subgrupo && row['SUBGRUPO']?.toString() !== this.filtrosComparativo.subgrupo) return false;
+            if (this.filtrosComparativo.tipo && row['TIPO']?.toString().trim() !== this.filtrosComparativo.tipo.trim()) return false;
             return true;
         });
     }
 
-    gerarComparativo() {
-        const dataBase = document.getElementById('dataBase').value;
-        const dataComparacao = document.getElementById('dataComparacao').value;
-        
-        if (!dataBase || !dataComparacao) {
-            alert(`Por favor, selecione os dois períodos para comparação`);
-            return;
-        }
-        
-        let dadosBase, dadosComparacao;
-        
-        if (this.tipoComparativo === 'dia') {
-            dadosBase = this.dataProcessor.processedData.filter(row => 
-                row['DATA']?.toString() === dataBase.toString()
-            );
-            
-            dadosComparacao = this.dataProcessor.processedData.filter(row => 
-                row['DATA']?.toString() === dataComparacao.toString()
-            );
-        } else {
-            dadosBase = this.dataProcessor.processedData.filter(row => {
-                const data = this.dataProcessor.parseDate(row['DATA']);
-                return data && `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}` === dataBase;
-            });
-            
-            dadosComparacao = this.dataProcessor.processedData.filter(row => {
-                const data = this.dataProcessor.parseDate(row['DATA']);
-                return data && `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}` === dataComparacao;
-            });
-        }
-        
-        dadosBase = this.aplicarFiltrosComparativo(dadosBase);
-        dadosComparacao = this.aplicarFiltrosComparativo(dadosComparacao);
-        
-        if (dadosBase.length === 0 && dadosComparacao.length === 0) {
-            alert(`Não há dados para os períodos selecionados com os filtros aplicados.\n\nTente remover alguns filtros ou escolher outras datas.`);
-            return;
-        }
-        
-        if (dadosBase.length === 0) {
-            const filtrosDesc = this.getFiltrosDescricao();
-            alert(`Não há dados para a data base selecionada${filtrosDesc}.\n\nTente escolher outra data ou remover alguns filtros.`);
-            return;
-        }
-        
-        if (dadosComparacao.length === 0) {
-            const filtrosDesc = this.getFiltrosDescricao();
-            alert(`Não há dados para a data de comparação selecionada${filtrosDesc}.\n\nTente escolher outra data ou remover alguns filtros.`);
-            return;
-        }
-        
-        const statsBase = this.calcularEstatisticas(dadosBase);
-        const statsComparacao = this.calcularEstatisticas(dadosComparacao);
-        
-        this.exibirResultado(statsBase, statsComparacao, dataBase, dataComparacao);
-    }
-
-    /**
-     * Gera o comparativo entre dois PERÍODOS (Semana 1 vs Semana 2)
-     * Ambos com De/Até configuráveis
-     */
-    gerarComparativoSemana() {
-        const s1De = document.getElementById('semana1De').value;
-        const s1Ate = document.getElementById('semana1Ate').value;
-        const s2De = document.getElementById('semana2De').value;
-        const s2Ate = document.getElementById('semana2Ate').value;
-        
-        if (!s1De || !s1Ate) {
-            alert('Por favor, selecione o período completo da Semana 1 (De e Até)');
-            return;
-        }
-        
-        if (!s2De || !s2Ate) {
-            alert('Por favor, selecione o período completo da Semana 2 (De e Até)');
-            return;
-        }
-        
-        let data1Inicio = this.dataProcessor.parseDate(s1De);
-        let data1Fim = this.dataProcessor.parseDate(s1Ate);
-        let data2Inicio = this.dataProcessor.parseDate(s2De);
-        let data2Fim = this.dataProcessor.parseDate(s2Ate);
-        
-        if (!data1Inicio || !data1Fim || !data2Inicio || !data2Fim) {
-            alert('Datas inválidas. Por favor, selecione novamente.');
-            return;
-        }
-        
-        // Auto-correção: se De > Até, inverte
-        if (data1Inicio > data1Fim) {
-            const temp = data1Inicio;
-            data1Inicio = data1Fim;
-            data1Fim = temp;
-        }
-        if (data2Inicio > data2Fim) {
-            const temp = data2Inicio;
-            data2Inicio = data2Fim;
-            data2Fim = temp;
-        }
-        
-        // Filtrar dados dos dois períodos
-        let dadosSemana1 = this.dataProcessor.processedData.filter(row => {
-            const data = this.dataProcessor.parseDate(row['DATA']);
-            if (!data) return false;
-            return data >= data1Inicio && data <= data1Fim;
-        });
-        
-        let dadosSemana2 = this.dataProcessor.processedData.filter(row => {
-            const data = this.dataProcessor.parseDate(row['DATA']);
-            if (!data) return false;
-            return data >= data2Inicio && data <= data2Fim;
-        });
-        
-        dadosSemana1 = this.aplicarFiltrosComparativo(dadosSemana1);
-        dadosSemana2 = this.aplicarFiltrosComparativo(dadosSemana2);
-        
-        if (dadosSemana1.length === 0 && dadosSemana2.length === 0) {
-            alert(`Não há dados para os períodos selecionados com os filtros aplicados.\n\nTente remover alguns filtros ou escolher outras datas.`);
-            return;
-        }
-        
-        if (dadosSemana1.length === 0) {
-            const filtrosDesc = this.getFiltrosDescricao();
-            alert(`Não há dados para a Semana 1${filtrosDesc}.\n\nTente escolher outra data ou remover alguns filtros.`);
-            return;
-        }
-        
-        if (dadosSemana2.length === 0) {
-            const filtrosDesc = this.getFiltrosDescricao();
-            alert(`Não há dados para a Semana 2${filtrosDesc}.\n\nTente escolher outra data ou remover alguns filtros.`);
-            return;
-        }
-        
-        const statsSemana1 = this.calcularEstatisticas(dadosSemana1);
-        const statsSemana2 = this.calcularEstatisticas(dadosSemana2);
-        
-        const dadosPorDiaSemana1 = this.agruparPorData(dadosSemana1);
-        const dadosPorDiaSemana2 = this.agruparPorData(dadosSemana2);
-        
-        this.exibirResultadoSemana(
-            statsSemana1, 
-            statsSemana2, 
-            data1Inicio, 
-            data1Fim, 
-            data2Inicio, 
-            data2Fim,
-            dadosPorDiaSemana1,
-            dadosPorDiaSemana2
-        );
-    }
-
-    formatDateObj(date) {
-        if (!date) return '';
-        return date.toLocaleDateString('pt-BR');
-    }
-
-    /**
-     * Gera a tabela TRANSPOSTA (datas nas colunas, métricas nas linhas)
-     * Recebe APENAS os dados de UMA semana, então mostra só as datas dessa semana
-     */
-    gerarTabelaTransposta(dadosPorDia) {
-        if (!dadosPorDia || dadosPorDia.length === 0) {
-            return '<p style="text-align:center;color:var(--text-muted);padding:20px;">Sem dados no período</p>';
-        }
-        
-        // Mapa: data -> stats
-        const mapaStats = {};
-        dadosPorDia.forEach(d => { 
-            mapaStats[d.dataFormatada] = d.stats; 
-        });
-        
-        // Datas desta semana, na ordem em que vieram (já ordenadas por agruparPorData)
-        const datas = dadosPorDia.map(d => d.dataFormatada);
-        
-        // Construir cabeçalho: MÉTRICA | Data1 | Data2 | ...
-        const cabecalho = `
-            <thead>
-                <tr>
-                    <th class="col-metrica">MÉTRICA</th>
-                    ${datas.map(data => `<th class="col-data">${data}</th>`).join('')}
-                </tr>
-            </thead>
-        `;
-        
-        // Definição das métricas (linhas)
-        const linhasMetricas = [
-            {
-                label: 'ITENS PEDIDOS',
-                valorFn: (s) => s ? s.totalItens.toLocaleString('pt-BR') : '-',
-                classe: ''
-            },
-            {
-                label: 'ITENS EM ABERTO',
-                valorFn: (s) => s ? `${s.itensAbertos.toLocaleString('pt-BR')} <span class="tabela-pct">(${s.percentualAbertos.toFixed(1)}%)</span>` : '-',
-                classe: 'tabela-aberto'
-            },
-            {
-                label: 'ITENS CORTADOS',
-                valorFn: (s) => s ? `${s.itensCortados.toLocaleString('pt-BR')} <span class="tabela-pct">(${s.percentualCortados.toFixed(1)}%)</span>` : '-',
-                classe: 'tabela-corte'
-            },
-            {
-                label: 'EFICIÊNCIA DE ATENDIMENTO',
-                valorFn: (s) => s ? `${s.itensAtendidos.toLocaleString('pt-BR')} <span class="tabela-pct">(${s.percentualAtendidos.toFixed(1)}%)</span>` : '-',
-                classe: 'tabela-expedido'
-            }
-        ];
-        
-        const linhas = linhasMetricas.map(metrica => {
-            const celulas = datas.map(data => {
-                const stats = mapaStats[data];
-                return `<td class="${metrica.classe}">${metrica.valorFn(stats)}</td>`;
-            }).join('');
-            
-            return `<tr>
-                <td class="col-metrica">${metrica.label}</td>
-                ${celulas}
-            </tr>`;
-        }).join('');
-        
-        return `<table class="periodo-tabela tabela-transposta">${cabecalho}<tbody>${linhas}</tbody></table>`;
-    }
-
-    /**
-     * Exibe o resultado do comparativo entre semanas (com TABELA TRANSPOSTA por semana)
-     */
-    exibirResultadoSemana(statsSemana1, statsSemana2, data1Inicio, data1Fim, data2Inicio, data2Fim, dadosPorDia1, dadosPorDia2) {
-        const container = document.getElementById('comparativoResultado');
-        container.style.display = 'block';
-        
-        const periodo1 = `${this.formatDateObj(data1Inicio)} a ${this.formatDateObj(data1Fim)}`;
-        const periodo2 = `${this.formatDateObj(data2Inicio)} a ${this.formatDateObj(data2Fim)}`;
-        
-        const diffCortados = statsSemana1.percentualCortados - statsSemana2.percentualCortados;
-        const diffAbertos = statsSemana1.percentualAbertos - statsSemana2.percentualAbertos;
-        const diffAtendidos = statsSemana1.percentualAtendidos - statsSemana2.percentualAtendidos;
-        
-        const indCortados = this.determinarIndicador(diffCortados, false);
-        const indAbertos = this.determinarIndicador(diffAbertos, false);
-        const indAtendidos = this.determinarIndicador(diffAtendidos, true);
-        
-        // Tabelas transpostas SEPARADAS (cada uma só com as datas da sua semana)
-        const tabelaTransposta1 = this.gerarTabelaTransposta(dadosPorDia1);
-        const tabelaTransposta2 = this.gerarTabelaTransposta(dadosPorDia2);
-        
-        container.innerHTML = `
-            <div class="comparativo-header-grande">
-                <div class="comparativo-header-grande-icon">
-                    <i class="fas fa-calendar-week"></i>
-                </div>
-                <h2 class="comparativo-header-grande-title">
-                    COMPARATIVO DE PERÍODOS
-                </h2>
-                <div class="comparativo-header-periodo">
-                    <span class="semana-tag semana-1">SEMANA 1</span>
-                    <span>${periodo1}</span>
-                    <i class="fas fa-arrow-right"></i>
-                    <span class="semana-tag semana-2">SEMANA 2</span>
-                    <span>${periodo2}</span>
-                </div>
-                <div class="comparativo-header-grande-total">
-                    <i class="fas fa-boxes"></i>
-                    <span>ITENS PEDIDOS: <strong>${statsSemana1.totalItens.toLocaleString('pt-BR')}</strong> vs <strong>${statsSemana2.totalItens.toLocaleString('pt-BR')}</strong></span>
-                </div>
-            </div>
-
-            <!-- ========== SEMANA 1 ========== -->
-            <div class="periodo-acumulado-titulo semana-1-titulo">
-                <i class="fas fa-chart-pie"></i>
-                <span>ACUMULADO DA SEMANA 1 (${periodo1})</span>
-            </div>
-            
-            <div class="comparativo-grid-grande">
-                <div class="comparativo-card-grande ${indCortados.tipo}">
-                    <div class="comparativo-card-grande-header">
-                        <div class="comparativo-card-grande-icon">
-                            <i class="fas fa-times-circle"></i>
-                        </div>
-                        <div class="comparativo-card-grande-label">ITENS CORTADOS</div>
-                    </div>
-                    <div class="comparativo-card-grande-body">
-                        <div class="comparativo-card-grande-number">
-                            ${statsSemana1.itensCortados.toLocaleString('pt-BR')}
-                        </div>
-                        <div class="comparativo-card-grande-percent">
-                            ${statsSemana1.percentualCortados.toFixed(1)}%
-                        </div>
-                    </div>
-                    <div class="comparativo-card-grande-footer ${indCortados.tipo}">
-                        <span class="diff-icon">${indCortados.icone}</span>
-                        <span><strong>${indCortados.texto}</strong> de ${Math.abs(diffCortados).toFixed(1)}%</span>
-                        <span class="diff-label">em relação à semana anterior</span>
-                    </div>
-                </div>
-
-                <div class="comparativo-card-grande ${indAbertos.tipo}">
-                    <div class="comparativo-card-grande-header">
-                        <div class="comparativo-card-grande-icon">
-                            <i class="fas fa-exclamation-triangle"></i>
-                        </div>
-                        <div class="comparativo-card-grande-label">ITENS EM ABERTO</div>
-                    </div>
-                    <div class="comparativo-card-grande-body">
-                        <div class="comparativo-card-grande-number">
-                            ${statsSemana1.itensAbertos.toLocaleString('pt-BR')}
-                        </div>
-                        <div class="comparativo-card-grande-percent">
-                            ${statsSemana1.percentualAbertos.toFixed(1)}%
-                        </div>
-                    </div>
-                    <div class="comparativo-card-grande-footer ${indAbertos.tipo}">
-                        <span class="diff-icon">${indAbertos.icone}</span>
-                        <span><strong>${indAbertos.texto}</strong> de ${Math.abs(diffAbertos).toFixed(1)}%</span>
-                        <span class="diff-label">em relação à semana anterior</span>
-                    </div>
-                </div>
-
-                <div class="comparativo-card-grande ${indAtendidos.tipo}">
-                    <div class="comparativo-card-grande-header">
-                        <div class="comparativo-card-grande-icon">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="comparativo-card-grande-label">ITENS ATENDIDOS</div>
-                    </div>
-                    <div class="comparativo-card-grande-body">
-                        <div class="comparativo-card-grande-number">
-                            ${statsSemana1.itensAtendidos.toLocaleString('pt-BR')}
-                        </div>
-                        <div class="comparativo-card-grande-percent">
-                            ${statsSemana1.percentualAtendidos.toFixed(1)}%
-                        </div>
-                    </div>
-                    <div class="comparativo-card-grande-footer ${indAtendidos.tipo}">
-                        <span class="diff-icon">${indAtendidos.icone}</span>
-                        <span><strong>${indAtendidos.texto}</strong> de ${Math.abs(diffAtendidos).toFixed(1)}%</span>
-                        <span class="diff-label">em relação à semana anterior</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="periodo-tabela-titulo">
-                <i class="fas fa-table"></i>
-                <span>DETALHAMENTO POR DIA (SEMANA 1)</span>
-            </div>
-            
-            <div class="periodo-tabela-container tabela-transposta-container">
-                ${tabelaTransposta1}
-            </div>
-
-            <!-- ========== SEMANA 2 ========== -->
-            <div class="periodo-acumulado-titulo semana-2-titulo">
-                <i class="fas fa-chart-pie"></i>
-                <span>ACUMULADO DA SEMANA 2 (${periodo2})</span>
-            </div>
-            
-            <div class="comparativo-grid-grande">
-                <div class="comparativo-card-grande ${this.getClassificacaoPorPercentual(statsSemana2.percentualCortados, 'corte')}">
-                    <div class="comparativo-card-grande-header">
-                        <div class="comparativo-card-grande-icon">
-                            <i class="fas fa-times-circle"></i>
-                        </div>
-                        <div class="comparativo-card-grande-label">ITENS CORTADOS</div>
-                    </div>
-                    <div class="comparativo-card-grande-body">
-                        <div class="comparativo-card-grande-number">
-                            ${statsSemana2.itensCortados.toLocaleString('pt-BR')}
-                        </div>
-                        <div class="comparativo-card-grande-percent">
-                            ${statsSemana2.percentualCortados.toFixed(1)}%
-                        </div>
-                    </div>
-                </div>
-
-                <div class="comparativo-card-grande ${this.getClassificacaoPorPercentual(statsSemana2.percentualAbertos, 'aberto')}">
-                    <div class="comparativo-card-grande-header">
-                        <div class="comparativo-card-grande-icon">
-                            <i class="fas fa-exclamation-triangle"></i>
-                        </div>
-                        <div class="comparativo-card-grande-label">ITENS EM ABERTO</div>
-                    </div>
-                    <div class="comparativo-card-grande-body">
-                        <div class="comparativo-card-grande-number">
-                            ${statsSemana2.itensAbertos.toLocaleString('pt-BR')}
-                        </div>
-                        <div class="comparativo-card-grande-percent">
-                            ${statsSemana2.percentualAbertos.toFixed(1)}%
-                        </div>
-                    </div>
-                </div>
-
-                <div class="comparativo-card-grande ${this.getClassificacaoPorPercentual(statsSemana2.percentualAtendidos, 'atendido')}">
-                    <div class="comparativo-card-grande-header">
-                        <div class="comparativo-card-grande-icon">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="comparativo-card-grande-label">ITENS ATENDIDOS</div>
-                    </div>
-                    <div class="comparativo-card-grande-body">
-                        <div class="comparativo-card-grande-number">
-                            ${statsSemana2.itensAtendidos.toLocaleString('pt-BR')}
-                        </div>
-                        <div class="comparativo-card-grande-percent">
-                            ${statsSemana2.percentualAtendidos.toFixed(1)}%
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="periodo-tabela-titulo">
-                <i class="fas fa-table"></i>
-                <span>DETALHAMENTO POR DIA (SEMANA 2)</span>
-            </div>
-            
-            <div class="periodo-tabela-container tabela-transposta-container">
-                ${tabelaTransposta2}
-            </div>
-        `;
-        
-        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    aplicarFiltrosComparativo(dados) {
+        return this.getDadosFiltradosBase.call({ dataProcessor: this.dataProcessor, filtrosComparativo: this.filtrosComparativo })
+            .constructor === Array ? dados.filter(row => {
+                if (this.filtrosComparativo.categoria && row['CATEGORIA']?.toString() !== this.filtrosComparativo.categoria) return false;
+                if (this.filtrosComparativo.grupo && row['GRUPO']?.toString() !== this.filtrosComparativo.grupo) return false;
+                if (this.filtrosComparativo.subgrupo && row['SUBGRUPO']?.toString() !== this.filtrosComparativo.subgrupo) return false;
+                if (this.filtrosComparativo.tipo && row['TIPO']?.toString().trim() !== this.filtrosComparativo.tipo.trim()) return false;
+                return true;
+            }) : [];
     }
 
     getFiltrosDescricao() {
@@ -937,245 +306,18 @@ class Comparativo {
         if (this.filtrosComparativo.grupo) filtros.push(`Grupo: ${this.filtrosComparativo.grupo}`);
         if (this.filtrosComparativo.subgrupo) filtros.push(`Subgrupo: ${this.filtrosComparativo.subgrupo}`);
         if (this.filtrosComparativo.tipo) filtros.push(`Tipo: ${this.filtrosComparativo.tipo}`);
-        
-        if (filtros.length > 0) {
-            return `\n\nFiltros aplicados:\n• ${filtros.join('\n• ')}`;
-        }
-        return '';
+        return filtros.length > 0 ? `\n\nFiltros aplicados:\n• ${filtros.join('\n• ')}` : '';
     }
 
-    gerarResumoPeriodo() {
-        const dataInicio = document.getElementById('dataInicioPeriodo').value;
-        const dataFim = document.getElementById('dataFimPeriodo').value;
-        
-        if (!dataInicio || !dataFim) {
-            alert('Por favor, selecione a data de início e a data de fim do período');
-            return;
-        }
-        
-        const dateInicio = this.dataProcessor.parseDate(dataInicio);
-        const dateFim = this.dataProcessor.parseDate(dataFim);
-        
-        if (!dateInicio || !dateFim) {
-            alert('Datas inválidas. Por favor, selecione novamente.');
-            return;
-        }
-        
-        if (dateInicio > dateFim) {
-            alert('A data de início não pode ser maior que a data de fim');
-            return;
-        }
-        
-        let dadosPeriodo = this.dataProcessor.processedData.filter(row => {
-            const data = this.dataProcessor.parseDate(row['DATA']);
-            if (!data) return false;
-            return data >= dateInicio && data <= dateFim;
-        });
-        
-        dadosPeriodo = this.aplicarFiltrosComparativo(dadosPeriodo);
-        
-        if (dadosPeriodo.length === 0) {
-            const filtrosDesc = this.getFiltrosDescricao();
-            alert(`Não há dados para o período selecionado${filtrosDesc}.\n\nTente escolher outro período ou remover alguns filtros.`);
-            return;
-        }
-        
-        const dadosPorData = this.agruparPorData(dadosPeriodo);
-        const statsAcumulado = this.calcularEstatisticas(dadosPeriodo);
-        
-        this.exibirResumoPeriodo(statsAcumulado, dadosPorData, dataInicio, dataFim);
-    }
-
-    agruparPorData(dados) {
-        const grupos = {};
-        
-        dados.forEach(row => {
-            const dataStr = row['DATA']?.toString();
-            if (!dataStr) return;
-            
-            if (!grupos[dataStr]) {
-                grupos[dataStr] = [];
-            }
-            grupos[dataStr].push(row);
-        });
-        
-        const resultado = Object.keys(grupos).map(dataStr => {
-            const dadosDoDia = grupos[dataStr];
-            const stats = this.calcularEstatisticas(dadosDoDia);
-            const dataObj = this.dataProcessor.parseDate(dataStr);
-            
-            return {
-                dataOriginal: dataStr,
-                dataFormatada: this.dataProcessor.formatDateDisplay(dataStr),
-                dataObj: dataObj,
-                stats: stats
-            };
-        });
-        
-        resultado.sort((a, b) => {
-            if (a.dataObj && b.dataObj) {
-                return a.dataObj.getTime() - b.dataObj.getTime();
-            }
-            return 0;
-        });
-        
-        return resultado;
-    }
-
-    exibirResumoPeriodo(statsAcumulado, dadosPorData, dataInicio, dataFim) {
-        const container = document.getElementById('comparativoResultado');
-        container.style.display = 'block';
-        
-        const periodoInicio = this.dataProcessor.formatDateDisplay(dataInicio);
-        const periodoFim = this.dataProcessor.formatDateDisplay(dataFim);
-        
-        const linhasTabela = dadosPorData.map(dia => {
-            const s = dia.stats;
-            return `
-                <tr>
-                    <td class="tabela-data">${dia.dataFormatada}</td>
-                    <td class="tabela-numero">${s.totalItens.toLocaleString('pt-BR')}</td>
-                    <td class="tabela-numero tabela-aberto">
-                        ${s.itensAbertos.toLocaleString('pt-BR')}
-                        <span class="tabela-pct">(${s.percentualAbertos.toFixed(1)}%)</span>
-                    </td>
-                    <td class="tabela-numero tabela-corte">
-                        ${s.itensCortados.toLocaleString('pt-BR')}
-                        <span class="tabela-pct">(${s.percentualCortados.toFixed(1)}%)</span>
-                    </td>
-                    <td class="tabela-numero tabela-expedido">
-                        ${s.itensAtendidos.toLocaleString('pt-BR')}
-                        <span class="tabela-pct">(${s.percentualAtendidos.toFixed(1)}%)</span>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-        
-        container.innerHTML = `
-            <div class="comparativo-header-grande">
-                <div class="comparativo-header-grande-icon">
-                    <i class="fas fa-calendar-week"></i>
-                </div>
-                <h2 class="comparativo-header-grande-title">
-                    RESUMO DO PERÍODO
-                </h2>
-                <div class="comparativo-header-periodo">
-                    <span>${periodoInicio}</span>
-                    <i class="fas fa-arrow-right"></i>
-                    <span>${periodoFim}</span>
-                </div>
-                <div class="comparativo-header-grande-total">
-                    <i class="fas fa-boxes"></i>
-                    <span>TOTAL DE ITENS PEDIDOS NO PERÍODO: <strong>${statsAcumulado.totalItens.toLocaleString('pt-BR')}</strong></span>
-                </div>
-            </div>
-
-            <div class="periodo-acumulado-titulo">
-                <i class="fas fa-chart-pie"></i>
-                <span>ACUMULADO DO PERÍODO</span>
-            </div>
-            
-            <div class="comparativo-grid-grande">
-                <div class="comparativo-card-grande ${this.getClassificacaoPorPercentual(statsAcumulado.percentualAbertos, 'aberto')}">
-                    <div class="comparativo-card-grande-header">
-                        <div class="comparativo-card-grande-icon">
-                            <i class="fas fa-exclamation-triangle"></i>
-                        </div>
-                        <div class="comparativo-card-grande-label">ITENS EM ABERTO</div>
-                    </div>
-                    <div class="comparativo-card-grande-body">
-                        <div class="comparativo-card-grande-number">
-                            ${statsAcumulado.itensAbertos.toLocaleString('pt-BR')}
-                        </div>
-                        <div class="comparativo-card-grande-percent">
-                            ${statsAcumulado.percentualAbertos.toFixed(1)}%
-                        </div>
-                    </div>
-                </div>
-
-                <div class="comparativo-card-grande ${this.getClassificacaoPorPercentual(statsAcumulado.percentualCortados, 'corte')}">
-                    <div class="comparativo-card-grande-header">
-                        <div class="comparativo-card-grande-icon">
-                            <i class="fas fa-times-circle"></i>
-                        </div>
-                        <div class="comparativo-card-grande-label">ITENS CORTADOS</div>
-                    </div>
-                    <div class="comparativo-card-grande-body">
-                        <div class="comparativo-card-grande-number">
-                            ${statsAcumulado.itensCortados.toLocaleString('pt-BR')}
-                        </div>
-                        <div class="comparativo-card-grande-percent">
-                            ${statsAcumulado.percentualCortados.toFixed(1)}%
-                        </div>
-                    </div>
-                </div>
-
-                <div class="comparativo-card-grande ${this.getClassificacaoPorPercentual(statsAcumulado.percentualAtendidos, 'atendido')}">
-                    <div class="comparativo-card-grande-header">
-                        <div class="comparativo-card-grande-icon">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="comparativo-card-grande-label">EFICIÊNCIA DE ATENDIMENTO</div>
-                    </div>
-                    <div class="comparativo-card-grande-body">
-                        <div class="comparativo-card-grande-number">
-                            ${statsAcumulado.itensAtendidos.toLocaleString('pt-BR')}
-                        </div>
-                        <div class="comparativo-card-grande-percent">
-                            ${statsAcumulado.percentualAtendidos.toFixed(1)}%
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="periodo-tabela-titulo">
-                <i class="fas fa-table"></i>
-                <span>DETALHAMENTO POR DIA</span>
-            </div>
-            
-            <div class="periodo-tabela-container">
-                <table class="periodo-tabela">
-                    <thead>
-                        <tr>
-                            <th>DATA</th>
-                            <th>ITENS PEDIDOS</th>
-                            <th>ITENS EM ABERTO</th>
-                            <th>ITENS CORTADOS</th>
-                            <th>EFICIÊNCIA DE ATENDIMENTO</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${linhasTabela}
-                    </tbody>
-                </table>
-            </div>
-        `;
-        
-        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    getClassificacaoPorPercentual(percentual, tipo) {
-        if (tipo === 'atendido') {
-            if (percentual >= 80) return 'bom';
-            if (percentual >= 50) return 'neutro';
-            return 'ruim';
-        }
-        if (tipo === 'corte') {
-            if (percentual > 0) return 'ruim';
-            return 'bom';
-        }
-        if (tipo === 'aberto') {
-            if (percentual > 5) return 'neutro';
-            return 'bom';
-        }
-        return 'neutro';
-    }
+    // ============================================================
+    // CÁLCULOS
+    // ============================================================
 
     calcularEstatisticas(dados) {
         const totalItens = dados.length;
-        const itensCortados = dados.filter(row => row['STATUS'] === 'CORTE').length;
-        const itensAbertos = dados.filter(row => row['STATUS'] === 'ABERTO').length;
-        const itensAtendidos = dados.filter(row => row['STATUS'] === 'EXPEDIDO').length;
+        const itensCortados = dados.filter(r => r['STATUS'] === 'CORTE').length;
+        const itensAbertos = dados.filter(r => r['STATUS'] === 'ABERTO').length;
+        const itensAtendidos = dados.filter(r => r['STATUS'] === 'EXPEDIDO').length;
         
         return {
             totalItens,
@@ -1188,6 +330,93 @@ class Comparativo {
         };
     }
 
+    agruparPorData(dados) {
+        const grupos = {};
+        dados.forEach(row => {
+            const d = row['DATA']?.toString();
+            if (!d) return;
+            if (!grupos[d]) grupos[d] = [];
+            grupos[d].push(row);
+        });
+        
+        return Object.keys(grupos).map(dataStr => ({
+            dataOriginal: dataStr,
+            dataFormatada: this.dataProcessor.formatDateDisplay(dataStr),
+            dataObj: this.dataProcessor.parseDate(dataStr),
+            stats: this.calcularEstatisticas(grupos[dataStr])
+        })).sort((a, b) => (a.dataObj && b.dataObj) ? a.dataObj - b.dataObj : 0);
+    }
+
+    determinarIndicador(diferenca, aumentoEhBom) {
+        if (diferenca > 0) {
+            if (aumentoEhBom) return { texto: 'AUMENTO', tipo: 'bom', icone: '📈' };
+            return { texto: 'AUMENTO', tipo: 'ruim', icone: '📈' };
+        } else if (diferenca < 0) {
+            if (aumentoEhBom) return { texto: 'REDUÇÃO', tipo: 'ruim', icone: '📉' };
+            return { texto: 'REDUÇÃO', tipo: 'bom', icone: '📉' };
+        }
+        return { texto: 'MANUTENÇÃO', tipo: 'neutro', icone: '➡️' };
+    }
+
+    getClassificacaoPorPercentual(percentual, tipo) {
+        if (tipo === 'atendido') {
+            if (percentual >= 80) return 'bom';
+            if (percentual >= 50) return 'neutro';
+            return 'ruim';
+        }
+        if (tipo === 'corte') return percentual > 0 ? 'ruim' : 'bom';
+        if (tipo === 'aberto') return percentual > 5 ? 'neutro' : 'bom';
+        return 'neutro';
+    }
+
+    formatDateObj(date) {
+        return date ? date.toLocaleDateString('pt-BR') : '';
+    }
+
+    // ============================================================
+    // COMPARATIVO DIA / MÊS
+    // ============================================================
+
+    gerarComparativo() {
+        const dataBase = document.getElementById('dataBase').value;
+        const dataComparacao = document.getElementById('dataComparacao').value;
+        
+        if (!dataBase || !dataComparacao) {
+            alert('Por favor, selecione os dois períodos para comparação');
+            return;
+        }
+        
+        let dadosBase, dadosComparacao;
+        
+        if (this.tipoComparativo === 'dia') {
+            dadosBase = this.dataProcessor.processedData.filter(r => r['DATA']?.toString() === dataBase.toString());
+            dadosComparacao = this.dataProcessor.processedData.filter(r => r['DATA']?.toString() === dataComparacao.toString());
+        } else {
+            dadosBase = this.dataProcessor.processedData.filter(r => {
+                const d = this.dataProcessor.parseDate(r['DATA']);
+                return d && `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` === dataBase;
+            });
+            dadosComparacao = this.dataProcessor.processedData.filter(r => {
+                const d = this.dataProcessor.parseDate(r['DATA']);
+                return d && `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}` === dataComparacao;
+            });
+        }
+        
+        dadosBase = this.aplicarFiltrosComparativo(dadosBase);
+        dadosComparacao = this.aplicarFiltrosComparativo(dadosComparacao);
+        
+        if (dadosBase.length === 0 || dadosComparacao.length === 0) {
+            const filtrosDesc = this.getFiltrosDescricao();
+            alert(`Não há dados para um dos períodos selecionados${filtrosDesc}.\n\nTente escolher outra data ou remover alguns filtros.`);
+            return;
+        }
+        
+        const statsBase = this.calcularEstatisticas(dadosBase);
+        const statsComparacao = this.calcularEstatisticas(dadosComparacao);
+        
+        this.exibirResultado(statsBase, statsComparacao, dataBase, dataComparacao);
+    }
+
     exibirResultado(statsBase, statsComparacao, dataBase, dataComparacao) {
         const container = document.getElementById('comparativoResultado');
         container.style.display = 'block';
@@ -1195,7 +424,6 @@ class Comparativo {
         const periodoBase = this.tipoComparativo === 'dia' 
             ? this.dataProcessor.formatDateDisplay(dataBase)
             : this.formatMesDisplay(dataBase);
-            
         const periodoComparacao = this.tipoComparativo === 'dia'
             ? this.dataProcessor.formatDateDisplay(dataComparacao)
             : this.formatMesDisplay(dataComparacao);
@@ -1208,6 +436,8 @@ class Comparativo {
         const indAbertos = this.determinarIndicador(diffAbertos, false);
         const indAtendidos = this.determinarIndicador(diffAtendidos, true);
         
+        const comp = this.tipoComparativo === 'dia' ? 'ao dia anterior' : 'ao mês anterior';
+        
         container.innerHTML = `
             <div class="comparativo-header-grande">
                 <div class="comparativo-header-grande-icon">
@@ -1218,100 +448,90 @@ class Comparativo {
                 </h2>
                 <div class="comparativo-header-grande-total">
                     <i class="fas fa-boxes"></i>
-                    <span>TOTAL DE ITENS PEDIDOS: <strong>${statsBase.totalItens.toLocaleString('pt-BR')}</strong></span>
+                    <span>ITENS PEDIDOS: <strong>${statsBase.totalItens.toLocaleString('pt-BR')}</strong></span>
                 </div>
             </div>
 
             <div class="comparativo-grid-grande">
-                <div class="comparativo-card-grande ${indCortados.tipo}">
-                    <div class="comparativo-card-grande-header">
-                        <div class="comparativo-card-grande-icon">
-                            <i class="fas fa-times-circle"></i>
-                        </div>
-                        <div class="comparativo-card-grande-label">ITENS CORTADOS</div>
-                    </div>
-                    <div class="comparativo-card-grande-body">
-                        <div class="comparativo-card-grande-number">
-                            ${statsBase.itensCortados.toLocaleString('pt-BR')}
-                        </div>
-                        <div class="comparativo-card-grande-percent">
-                            ${statsBase.percentualCortados.toFixed(1)}%
-                        </div>
-                    </div>
-                    <div class="comparativo-card-grande-footer ${indCortados.tipo}">
-                        <span class="diff-icon">${indCortados.icone}</span>
-                        <span><strong>${indCortados.texto}</strong> de ${Math.abs(diffCortados).toFixed(1)}%</span>
-                        <span class="diff-label">em relação ao período anterior</span>
-                    </div>
-                </div>
-
-                <div class="comparativo-card-grande ${indAbertos.tipo}">
-                    <div class="comparativo-card-grande-header">
-                        <div class="comparativo-card-grande-icon">
-                            <i class="fas fa-exclamation-triangle"></i>
-                        </div>
-                        <div class="comparativo-card-grande-label">ITENS EM ABERTO</div>
-                    </div>
-                    <div class="comparativo-card-grande-body">
-                        <div class="comparativo-card-grande-number">
-                            ${statsBase.itensAbertos.toLocaleString('pt-BR')}
-                        </div>
-                        <div class="comparativo-card-grande-percent">
-                            ${statsBase.percentualAbertos.toFixed(1)}%
-                        </div>
-                    </div>
-                    <div class="comparativo-card-grande-footer ${indAbertos.tipo}">
-                        <span class="diff-icon">${indAbertos.icone}</span>
-                        <span><strong>${indAbertos.texto}</strong> de ${Math.abs(diffAbertos).toFixed(1)}%</span>
-                        <span class="diff-label">em relação ao período anterior</span>
-                    </div>
-                </div>
-
-                <div class="comparativo-card-grande ${indAtendidos.tipo}">
-                    <div class="comparativo-card-grande-header">
-                        <div class="comparativo-card-grande-icon">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="comparativo-card-grande-label">ITENS ATENDIDOS</div>
-                    </div>
-                    <div class="comparativo-card-grande-body">
-                        <div class="comparativo-card-grande-number">
-                            ${statsBase.itensAtendidos.toLocaleString('pt-BR')}
-                        </div>
-                        <div class="comparativo-card-grande-percent">
-                            ${statsBase.percentualAtendidos.toFixed(1)}%
-                        </div>
-                    </div>
-                    <div class="comparativo-card-grande-footer ${indAtendidos.tipo}">
-                        <span class="diff-icon">${indAtendidos.icone}</span>
-                        <span><strong>${indAtendidos.texto}</strong> de ${Math.abs(diffAtendidos).toFixed(1)}%</span>
-                        <span class="diff-label">em relação ao período anterior</span>
-                    </div>
-                </div>
+                ${this.gerarCardItensPedidos(statsBase, statsComparacao, 'TOTAL DE ITENS')}
+                ${this.gerarCardSimples('ITENS CORTADOS', statsBase.itensCortados, statsBase.percentualCortados, 'fa-times-circle', indCortados, diffCortados, comp)}
+                ${this.gerarCardSimples('ITENS EM ABERTO', statsBase.itensAbertos, statsBase.percentualAbertos, 'fa-exclamation-triangle', indAbertos, diffAbertos, comp)}
+                ${this.gerarCardSimples('ITENS ATENDIDOS', statsBase.itensAtendidos, statsBase.percentualAtendidos, 'fa-check-circle', indAtendidos, diffAtendidos, comp)}
             </div>
         `;
         
         container.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    determinarIndicador(diferenca, aumentoEhBom) {
-        if (diferenca > 0) {
-            if (aumentoEhBom) {
-                return { texto: 'AUMENTO', tipo: 'bom', icone: '📈' };
-            } else {
-                return { texto: 'AUMENTO', tipo: 'ruim', icone: '📈' };
-            }
-        } else if (diferenca < 0) {
-            if (aumentoEhBom) {
-                return { texto: 'REDUÇÃO', tipo: 'ruim', icone: '📉' };
-            } else {
-                return { texto: 'REDUÇÃO', tipo: 'bom', icone: '📉' };
-            }
-        } else {
-            return { texto: 'MANUTENÇÃO', tipo: 'neutro', icone: '➡️' };
-        }
+    // ============================================================
+    // HELPERS DE RENDERIZAÇÃO DE CARDS
+    // ============================================================
+
+    /**
+     * Card especial de ITENS PEDIDOS (só mostra o total, sem indicador de variação)
+     */
+    gerarCardItensPedidos(statsAtual, statsComparacao, label) {
+        const diffTotal = statsAtual.totalItens - statsComparacao.totalItens;
+        const diffPct = statsComparacao.totalItens > 0 
+            ? (diffTotal / statsComparacao.totalItens) * 100 
+            : 0;
+        
+        const tipo = diffTotal > 0 ? 'bom' : (diffTotal < 0 ? 'neutro' : 'neutro');
+        const icone = diffTotal > 0 ? '📈' : (diffTotal < 0 ? '📉' : '➡️');
+        const texto = diffTotal > 0 ? 'AUMENTO' : (diffTotal < 0 ? 'REDUÇÃO' : 'MANUTENÇÃO');
+        
+        return `
+            <div class="comparativo-card-grande ${tipo}">
+                <div class="comparativo-card-grande-header">
+                    <div class="comparativo-card-grande-icon">
+                        <i class="fas fa-boxes"></i>
+                    </div>
+                    <div class="comparativo-card-grande-label">${label}</div>
+                </div>
+                <div class="comparativo-card-grande-body">
+                    <div class="comparativo-card-grande-number">
+                        ${statsAtual.totalItens.toLocaleString('pt-BR')}
+                    </div>
+                    <div class="comparativo-card-grande-percent">
+                        ${statsComparacao.totalItens.toLocaleString('pt-BR')} no período anterior
+                    </div>
+                </div>
+                <div class="comparativo-card-grande-footer ${tipo}">
+                    <span class="diff-icon">${icone}</span>
+                    <span class="diff-big"><strong>${texto}</strong> de ${Math.abs(diffPct).toFixed(1)}%</span>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Card padrão (cortados / aberto / atendidos) com indicador em destaque
+     */
+    gerarCardSimples(label, valor, percentual, icone, indicador, diff, comparacaoTexto) {
+        return `
+            <div class="comparativo-card-grande ${indicador.tipo}">
+                <div class="comparativo-card-grande-header">
+                    <div class="comparativo-card-grande-icon">
+                        <i class="fas ${icone}"></i>
+                    </div>
+                    <div class="comparativo-card-grande-label">${label}</div>
+                </div>
+                <div class="comparativo-card-grande-body">
+                    <div class="comparativo-card-grande-number">
+                        ${valor.toLocaleString('pt-BR')}
+                    </div>
+                    <div class="comparativo-card-grande-percent">
+                        ${percentual.toFixed(1)}%
+                    </div>
+                </div>
+                <div class="comparativo-card-grande-footer ${indicador.tipo}">
+                    <span class="diff-icon">${indicador.icone}</span>
+                    <span class="diff-big"><strong>${indicador.texto}</strong> de ${Math.abs(diff).toFixed(1)}%</span>
+                    <span class="diff-label">em relação ${comparacaoTexto}</span>
+                </div>
+            </div>
+        `;
     }
 }
 
-// Exportar classe
 window.Comparativo = Comparativo;
